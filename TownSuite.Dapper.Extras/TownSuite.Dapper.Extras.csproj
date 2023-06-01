@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+    <RootNamespace>TownSuite.Dapper.Extras</RootNamespace>
+    <AssemblyName>TownSuite.Dapper.Extras</AssemblyName>
+    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1</AssemblyVersion>
+    <FileVersion>1.0.1</FileVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Company>TownSuite Muncipal Software Inc.</Company>
+    <Authors>TownSuite</Authors>
+    <Description>Extra dapper extensions.</Description>
+    <PackageTags>dapper docker micro-orm</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" Condition=" '$(TargetFramework)' == 'netstandard2.0' " />
+  </ItemGroup>
+
+</Project>
