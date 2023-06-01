@@ -4,6 +4,14 @@
     <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <RootNamespace>TownSuite.Dapper.Extras</RootNamespace>
     <AssemblyName>TownSuite.Dapper.Extras</AssemblyName>
+    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1</AssemblyVersion>
+    <FileVersion>1.0.1</FileVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Company>TownSuite Muncipal Software Inc.</Company>
+    <Authors>TownSuite</Authors>
+    <Description>Extra dapper extensions.</Description>
+    <PackageTags>dapper docker micro-orm</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
