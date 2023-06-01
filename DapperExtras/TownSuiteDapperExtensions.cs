@@ -8,7 +8,7 @@ using Dapper;
 using System.Diagnostics;
 using System.Data.Common;
 
-namespace Dapper.Extras
+namespace TownSuite.Dapper.Extras
 {
 	public static partial class TownSuiteDapperExtensions
 	{
