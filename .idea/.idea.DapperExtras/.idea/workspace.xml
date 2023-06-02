@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="50e3b43e-0706-472a-8fd1-bc6920725ba4" name="Changes" comment="Rename project/solution">
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.DapperExtras/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TownSuite.Dapper.Extras.sln" beforeDir="false" afterPath="$PROJECT_DIR$/TownSuite.Dapper.Extras.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TownSuite.Dapper.Extras/TownSuiteDapperExtensions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TownSuite.Dapper.Extras/TownSuiteDapperExtensions.cs" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///Users/petergill/Projects/DapperExtras/DapperExtras/TownSuiteDapperExtensions.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/petergill/Projects/DapperExtras/DapperExtras/TownSuiteDapperExtensions.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/TownSuite.Dapper.Extras/TownSuiteDapperExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/TownSuite.Dapper.Extras/obj/Debug/net6.0/DapperExtras.AssemblyInfo.cs" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
+  <component name="ProjectId" id="2QcncqlpvthmwuVb6MgKMEBseCq" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "rider.external.source.directories": [
+      "/Users/petergill/Library/Application Support/JetBrains/Rider2023.1/resharper-host/DecompilerCache",
+      "/Users/petergill/Library/Application Support/JetBrains/Rider2023.1/resharper-host/SourcesCache",
+      "/Users/petergill/.local/share/Symbols/src"
+    ]
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="50e3b43e-0706-472a-8fd1-bc6920725ba4" name="Changes" comment="" />
+      <created>1685661820287</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1685661820287</updated>
+      <workItem from="1685661827161" duration="2415000" />
+    </task>
+    <task id="LOCAL-00001" summary="migrate to sdk style project">
+      <created>1685662471659</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1685662471659</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Generate nuget package on build">
+      <created>1685662659561</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1685662659561</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Rename project/solution">
+      <created>1685662790867</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1685662790867</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
+  <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+    <MESSAGE value="migrate to sdk style project" />
+    <MESSAGE value="Generate nuget package on build" />
+    <MESSAGE value="Rename project/solution" />
+    <option name="LAST_COMMIT_MESSAGE" value="Rename project/solution" />
+  </component>
+</project>
