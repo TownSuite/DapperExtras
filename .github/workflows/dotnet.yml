@@ -1,0 +1,37 @@
+name: .NET
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  linux-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+      - name: Restore dependencies
+        run: dotnet restore TownSuite.Dapper.Extras.sln
+      - name: Build
+        run: dotnet build TownSuite.Dapper.Extras.sln --no-restore -c Release
+      - name: Test
+        run: cwd=`pwd` && dotnet vstest "TownSuite.DapperExtras.Tests/bin/Release/net6.0/TownSuite.DapperExtras.Tests.dll" --logger:"trx;LogFileName=$cwd/TownSuite.DapperExtras.Tests/bin/Release/net6.0/nunit-result.trx"
+      - name: Archive test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            TownSuite.DapperExtras.Tests/bin/Release/net6.0/nunit-result.trx
+          retention-days: 1
+      - name: Archive nuget package
+        uses: actions/upload-artifact@v3
+        with:
+          name: "TownSuite.DapperExtras.AnyCPU"
+          path: |
+            TownSuite.DapperExtras/bin/Release/*.nupkg
+          retention-days: 1
