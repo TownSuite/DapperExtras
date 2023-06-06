@@ -88,7 +88,7 @@ namespace TownSuite.DapperExtras
             IDbTransaction transaction = null, int? commandTimeout = null)
         {
             var sql = UpSertSqlGeneration<T>(setParam, whereParam);
-            var param = TsExtrasCommonSqlGen.Merge(setParam, whereParam);
+            var param = TsExtrasCommonSqlGen.Merge(whereParam, setParam);
 
             return await connection.ExecuteAsync(sql.ToString(), param, transaction, commandTimeout: commandTimeout);
         }
