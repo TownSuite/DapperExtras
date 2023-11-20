@@ -193,5 +193,19 @@ namespace TownSuite.DapperExtras
             sql.Append(");");
             return sql.ToString();
         }
+        
+        public override int Insert<T>(IDbConnection connection, object param,
+            IDbTransaction transaction = null, int? commandTimeout = null)
+        {
+            var sql = InsertGeneration<T>(param, startQoute: "[", endQoute: "]");
+            return connection.Execute(sql, param, transaction, commandTimeout: commandTimeout);
+        }
+
+        public override async Task<int> InsertAsync<T>(IDbConnection connection, object param,
+            IDbTransaction transaction = null, int? commandTimeout = null)
+        {
+            var sql = InsertGeneration<T>(param, startQoute: "[", endQoute: "]");
+            return await connection.ExecuteAsync(sql, param, transaction, commandTimeout: commandTimeout);
+        }
     }
 }

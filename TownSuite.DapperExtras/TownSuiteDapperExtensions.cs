@@ -93,6 +93,20 @@ namespace TownSuite.DapperExtras
             var adapter = GetAdapter(connection);
             return await adapter.UpSertAsync<T>(connection, setParam, whereParam, transaction, commandTimeout);
         }
+        
+        public static int TsInsert<T>(this IDbConnection connection, object param,
+            IDbTransaction transaction = null, int? commandTimeout = null) where T : class
+        {
+            var adapter = GetAdapter(connection);
+            return adapter.Insert<T>(connection, param, transaction, commandTimeout);
+        }
+
+        public static async Task<int> TsInsertAsync<T>(this IDbConnection connection, object param,
+            IDbTransaction transaction = null, int? commandTimeout = null) where T : class
+        {
+            var adapter = GetAdapter(connection);
+            return await adapter.InsertAsync<T>(connection, param, transaction, commandTimeout);
+        }
 
         public static DataTable QueryDt(this IDbConnection connection, string sql, object param = null,
             IDbTransaction transaction = null, int? commandTimeout = null,

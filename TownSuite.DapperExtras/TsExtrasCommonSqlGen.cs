@@ -42,6 +42,12 @@ namespace TownSuite.DapperExtras
         public abstract Task<int> UpSertAsync<T>(IDbConnection connection, T setParam, object whereParam,
             IDbTransaction transaction = null, int? commandTimeout = null);
 
+        public abstract int Insert<T>(IDbConnection connection, object param,
+            IDbTransaction transaction = null, int? commandTimeout = null);
+
+        public abstract Task<int> InsertAsync<T>(IDbConnection connection, object param,
+            IDbTransaction transaction = null, int? commandTimeout = null);
+        
         internal string GenerateGetWhereSql<T>(object param, string startQoute = "", string endQoute = "")
         {
             var type = typeof(T);
@@ -247,6 +253,8 @@ namespace TownSuite.DapperExtras
         internal virtual string UpSertSqlGeneration<T>(object setParam, object whereParam,
             string startQoute = "", string endQoute = "")
         {
+            // TODO: cache generate sql for input type
+            
             var type = typeof(T);
             var setNames = new List<string>();
             var whereNames = new List<string>();
@@ -322,6 +330,45 @@ namespace TownSuite.DapperExtras
             }
 
             return name;
+        }
+        
+        internal virtual string InsertGeneration<T>(object setParam,
+            string startQoute = "", string endQoute = "")
+        {
+            // TODO: cache generate sql for input type
+            
+            var type = typeof(T);
+            var setNames = new List<string>();
+            TsExtrasCommonSqlGen.ParameterNameList(setParam, setNames);
+
+            var tableName = TsExtrasCommonSqlGen.GetTableName(type);
+
+            var sql = new StringBuilder();
+
+            sql.Append("INSERT INTO ");
+            sql.Append($"{startQoute}{tableName}{endQoute}");
+            sql.AppendLine(" (");
+            sql.AppendLine(string.Join(",", setNames.Select(p => $"{startQoute}{p}{endQoute}")));
+            sql.AppendLine(" )");
+
+            sql.AppendLine("VALUES (");
+            bool setComma = false;
+            foreach (var name in setNames)
+            {
+                if (setComma)
+                {
+                    sql.Append(", ");
+                }
+
+                // SELECT
+                sql.Append("@");
+                sql.Append(name);
+                sql.Append("_1");
+                setComma = true;
+            }
+            
+            sql.Append(");");
+            return sql.ToString();
         }
     }
 }
