@@ -78,10 +78,10 @@ UPDATE  SET ""Id""=EXCLUDED.""Id"", ""Col1""=EXCLUDED.""Col1"", ""Col2""=EXCLUDE
                 Col3 = DateTime.MinValue
             });
         Assert.That(sql, Is.EqualTo(@"INSERT INTO ExampleTable (
-Id,Col1,Col2,Col3
+Col1,Col2,Col3
  )
 VALUES (
-@Id, @Col1, @Col2, @Col3);"));
+@Col1, @Col2, @Col3);"));
     }
     
     [Test]

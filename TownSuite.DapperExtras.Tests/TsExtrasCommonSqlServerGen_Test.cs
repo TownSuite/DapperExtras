@@ -84,10 +84,10 @@ INSERT (
                 Col3 = DateTime.MinValue
             });
         Assert.That(sql, Is.EqualTo(@"INSERT INTO ExampleTable (
-Id,Col1,Col2,Col3
+Col1,Col2,Col3
  )
 VALUES (
-@Id, @Col1, @Col2, @Col3);"));
+@Col1, @Col2, @Col3);"));
     }
     
     [Test]

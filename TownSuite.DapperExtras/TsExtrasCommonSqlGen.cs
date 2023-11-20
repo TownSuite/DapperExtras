@@ -181,16 +181,22 @@ namespace TownSuite.DapperExtras
             return result;
         }
 
-        protected static void ParameterNameList(object setParam, List<string> setNames)
+        protected static void ParameterNameList(object setParam, List<string> setNames, bool includeKeyColumn=true)
         {
             var computedProperties = setParam.GetType().GetProperties().Where(p => p.GetCustomAttributes(true).Any(a => a.GetType().Name == "ComputedAttribute")).ToList();
+            var keyProperties = setParam.GetType().GetProperties().Where(p => p.GetCustomAttributes(true).Any(a => a.GetType().Name == "KeyAttribute")).ToList();
+
             
             if (setParam.GetType() == typeof(DynamicParameters))
             {
                 var p = (DynamicParameters)setParam;
                 foreach (var item in p.ParameterNames)
                 {
-                    if (computedProperties.Any(prop => prop.Name == item))
+                    if (computedProperties.Any(prop => prop.Name == item) )
+                    {
+                        continue;
+                    }
+                    if (!includeKeyColumn && keyProperties.Any(prop => prop.Name == item) )
                     {
                         continue;
                     }
@@ -208,6 +214,10 @@ namespace TownSuite.DapperExtras
                 foreach (var prop in props)
                 {
                     if (computedProperties.Any(p => p.Name == prop.Name))
+                    {
+                        continue;
+                    }
+                    if (!includeKeyColumn && keyProperties.Any(p => p.Name == prop.Name) )
                     {
                         continue;
                     }
@@ -268,8 +278,8 @@ namespace TownSuite.DapperExtras
             var type = typeof(T);
             var setNames = new List<string>();
             var whereNames = new List<string>();
-            TsExtrasCommonSqlGen.ParameterNameList(setParam, setNames);
-            TsExtrasCommonSqlGen.ParameterNameList(whereParam, whereNames);
+            TsExtrasCommonSqlGen.ParameterNameList(setParam, setNames, includeKeyColumn: true);
+            TsExtrasCommonSqlGen.ParameterNameList(whereParam, whereNames, includeKeyColumn: true);
 
             var tableName = TsExtrasCommonSqlGen.GetTableName(type);
 
@@ -349,7 +359,7 @@ namespace TownSuite.DapperExtras
             
             var type = typeof(T);
             var setNames = new List<string>();
-            TsExtrasCommonSqlGen.ParameterNameList(setParam, setNames);
+            TsExtrasCommonSqlGen.ParameterNameList(setParam, setNames, includeKeyColumn: false);
 
             var tableName = TsExtrasCommonSqlGen.GetTableName(type);
 
