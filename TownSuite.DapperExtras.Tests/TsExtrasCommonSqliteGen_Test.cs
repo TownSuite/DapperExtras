@@ -81,7 +81,7 @@ UPDATE  SET ""Id""=EXCLUDED.""Id"", ""Col1""=EXCLUDED.""Col1"", ""Col2""=EXCLUDE
 Id,Col1,Col2,Col3
  )
 VALUES (
-@Id_1, @Col1_1, @Col2_1, @Col3_1);"));
+@Id, @Col1, @Col2, @Col3);"));
     }
     
     [Test]
@@ -101,6 +101,6 @@ VALUES (
 Id,Col1,Col2,Col3
  )
 VALUES (
-@Id_1, @Col1_1, @Col2_1, @Col3_1);"));
+@Id, @Col1, @Col2, @Col3);"));
     }
 }

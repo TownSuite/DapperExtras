@@ -373,7 +373,6 @@ namespace TownSuite.DapperExtras
                 // SELECT
                 sql.Append("@");
                 sql.Append(name);
-                sql.Append("_1");
                 setComma = true;
             }
             
