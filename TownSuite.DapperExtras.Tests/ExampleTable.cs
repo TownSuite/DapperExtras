@@ -12,4 +12,7 @@ public class ExampleTable
     public string Col2 { get; set; }
 
     public DateTime Col3 { get; set; }
+    
+    [Computed]
+    public DateTime IgnoreMe { get; set; }
 }

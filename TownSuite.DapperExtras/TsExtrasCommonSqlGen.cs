@@ -183,11 +183,17 @@ namespace TownSuite.DapperExtras
 
         protected static void ParameterNameList(object setParam, List<string> setNames)
         {
+            var computedProperties = setParam.GetType().GetProperties().Where(p => p.GetCustomAttributes(true).Any(a => a.GetType().Name == "ComputedAttribute")).ToList();
+            
             if (setParam.GetType() == typeof(DynamicParameters))
             {
                 var p = (DynamicParameters)setParam;
                 foreach (var item in p.ParameterNames)
                 {
+                    if (computedProperties.Any(prop => prop.Name == item))
+                    {
+                        continue;
+                    }
                     setNames.Add(item);
                 }
             }
@@ -201,6 +207,10 @@ namespace TownSuite.DapperExtras
 
                 foreach (var prop in props)
                 {
+                    if (computedProperties.Any(p => p.Name == prop.Name))
+                    {
+                        continue;
+                    }
                     setNames.Add(prop.Name);
                 }
             }
