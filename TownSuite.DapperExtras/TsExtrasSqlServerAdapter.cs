@@ -99,7 +99,7 @@ namespace TownSuite.DapperExtras
             var type = typeof(T);
             var setNames = new List<string>();
             var whereNames = new List<string>();
-            TsExtrasCommonSqlGen.ParameterNameList(setParam, setNames);
+            TsExtrasCommonSqlGen.ParameterNameList(setParam, setNames, includeKeyColumn: false);
             TsExtrasCommonSqlGen.ParameterNameList(whereParam, whereNames);
 
             var tableName = TsExtrasCommonSqlGen.GetTableName(type);

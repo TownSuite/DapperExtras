@@ -46,7 +46,7 @@ public class TsExtrasCommonSqlServerGen_Test
     public void SqlServer_Upsert_Test()
     {
         var genSql = new TsExtrasSqlServerAdapter();
-        var sql =
+        string sql =
             genSql.UpSertSqlGeneration<ExampleTable>(new ExampleTable()
             {
                 Id = 123,
@@ -62,11 +62,11 @@ USING
 (SELECT @Id_1 Id) AS src 
 ON tgt.[Id]=src.[Id]
 WHEN MATCHED THEN
-UPDATE SET [Id]=@Id_2, [Col1]=@Col1_2, [Col2]=@Col2_2, [Col3]=@Col3_2
+UPDATE SET [Col1]=@Col1_2, [Col2]=@Col2_2, [Col3]=@Col3_2
 WHEN NOT MATCHED THEN 
 INSERT (
-[Id], [Col1], [Col2], [Col3]) VALUES (
-@Id_2, @Col1_2, @Col2_2, @Col3_2
+[Col1], [Col2], [Col3]) VALUES (
+@Col1_2, @Col2_2, @Col3_2
 );"));
     }
     
