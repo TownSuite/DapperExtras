@@ -10,26 +10,26 @@ jobs:
   linux-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
       - name: Restore dependencies
         run: dotnet restore TownSuite.Dapper.Extras.sln
       - name: Build
         run: dotnet build TownSuite.Dapper.Extras.sln --no-restore -c Release
       - name: Test
-        run: cwd=`pwd` && dotnet vstest "TownSuite.DapperExtras.Tests/bin/Release/net6.0/TownSuite.DapperExtras.Tests.dll" --logger:"trx;LogFileName=$cwd/TownSuite.DapperExtras.Tests/bin/Release/net6.0/nunit-result.trx"
+        run: cwd=`pwd` && dotnet vstest "TownSuite.DapperExtras.Tests/bin/Release/net8.0/TownSuite.DapperExtras.Tests.dll" --logger:"trx;LogFileName=$cwd/TownSuite.DapperExtras.Tests/bin/Release/net8.0/nunit-result.trx"
       - name: Archive test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: |
-            TownSuite.DapperExtras.Tests/bin/Release/net6.0/nunit-result.trx
+            TownSuite.DapperExtras.Tests/bin/Release/net8.0/nunit-result.trx
           retention-days: 1
       - name: Archive nuget package
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "TownSuite.DapperExtras.AnyCPU"
           path: |
