@@ -102,13 +102,17 @@ namespace TownSuite.DapperExtras
             TsExtrasCommonSqlGen.ParameterNameList(setParam, setNames, includeKeyColumn: false);
             TsExtrasCommonSqlGen.ParameterNameList(whereParam, whereNames);
 
-            var tableName = TsExtrasCommonSqlGen.GetTableName(type);
+            var tableParts = TsExtrasCommonSqlGen.GetSchemaAndTableName(type);
 
             // TODO: cache generate sql for input type
             var sql = new StringBuilder();
 
             sql.AppendLine("MERGE INTO ");
-            sql.AppendLine($"{startQoute}{tableName}{endQoute}");
+            if (!string.IsNullOrEmpty(tableParts.Schema))
+            {
+                sql.Append($"{startQoute}{tableParts.Schema}{endQoute}.");
+            }
+            sql.AppendLine($"{startQoute}{tableParts.Table}{endQoute}");
             sql.AppendLine("AS tgt ");
             sql.AppendLine("USING");
             sql.Append("(SELECT ");

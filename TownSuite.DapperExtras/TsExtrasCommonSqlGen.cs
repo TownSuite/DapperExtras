@@ -76,10 +76,14 @@ namespace TownSuite.DapperExtras
             }
 
             var sql = new StringBuilder();
-            var tableName = GetTableName(type);
+            var tableNameParts = GetSchemaAndTableName(type);
 
             sql.Append("SELECT * FROM ");
-            sql.Append($"{startQoute}{tableName}{endQoute}");
+            if (!string.IsNullOrEmpty(tableNameParts.Schema))
+            {
+                sql.Append($"{startQoute}{tableNameParts.Schema}{endQoute}.");
+            }
+            sql.Append($"{startQoute}{tableNameParts.Table}{endQoute}");
             sql.Append(" WHERE ");
 
             bool setAnd = false;
@@ -117,10 +121,14 @@ namespace TownSuite.DapperExtras
             ParameterNameList(whereParam, whereNames);
 
             var sql = new StringBuilder();
-            var tableName = GetTableName(type);
+            var tableParts = GetSchemaAndTableName(type);
 
             sql.Append("UPDATE ");
-            sql.Append($"{startQoute}{tableName}{endQoute}");
+            if (!string.IsNullOrEmpty(tableParts.Schema))
+            {
+                sql.Append($"{startQoute}{tableParts.Schema}{endQoute}.");
+            }
+            sql.Append($"{startQoute}{tableParts.Table}{endQoute}");
             sql.Append(" SET ");
 
             bool setComma = false;
@@ -238,10 +246,14 @@ namespace TownSuite.DapperExtras
             }
 
             var sql = new StringBuilder();
-            var name = GetTableName(type);
+            var tableParts = GetSchemaAndTableName(type);
 
             sql.Append("DELETE FROM ");
-            sql.Append($"{startQoute}{name}{endQoute}");
+            if (!string.IsNullOrEmpty(tableParts.Schema))
+            {
+                sql.Append($"{startQoute}{tableParts.Schema}{endQoute}.");
+            }
+            sql.Append($"{startQoute}{tableParts.Table}{endQoute}");
             sql.Append(" WHERE ");
 
             bool setAnd = false;
@@ -281,12 +293,16 @@ namespace TownSuite.DapperExtras
             TsExtrasCommonSqlGen.ParameterNameList(setParam, setNames, includeKeyColumn: true);
             TsExtrasCommonSqlGen.ParameterNameList(whereParam, whereNames, includeKeyColumn: true);
 
-            var tableName = TsExtrasCommonSqlGen.GetTableName(type);
+            var tableParts = TsExtrasCommonSqlGen.GetSchemaAndTableName(type);
 
             var sql = new StringBuilder();
 
             sql.Append("INSERT INTO ");
-            sql.Append($"{startQoute}{tableName}{endQoute}");
+            if (!string.IsNullOrEmpty(tableParts.Schema))
+            {
+                sql.Append($"{startQoute}{tableParts.Schema}{endQoute}.");
+            }
+            sql.Append($"{startQoute}{tableParts.Table}{endQoute}");
             sql.AppendLine(" (");
             sql.AppendLine(string.Join(",", setNames.Select(p => $"{startQoute}{p}{endQoute}")));
             sql.AppendLine(" )");
@@ -333,7 +349,7 @@ namespace TownSuite.DapperExtras
             return sql.ToString();
         }
 
-        protected static string GetTableName(Type type)
+        protected static (string Schema, string Table) GetSchemaAndTableName(Type type)
         {
             string name;
 
@@ -349,7 +365,15 @@ namespace TownSuite.DapperExtras
                     name = name.Substring(1);
             }
 
-            return name;
+            string schema = null;
+            string table = null;
+            if (name.Contains('.'))
+            {
+                var parts = name.Split(new[] { '.' }, 2);
+                return (parts[0], parts[1]);
+            }
+
+            return ("", name);
         }
         
         internal virtual string InsertGeneration<T>(object setParam,
@@ -361,12 +385,16 @@ namespace TownSuite.DapperExtras
             var setNames = new List<string>();
             TsExtrasCommonSqlGen.ParameterNameList(setParam, setNames, includeKeyColumn: false);
 
-            var tableName = TsExtrasCommonSqlGen.GetTableName(type);
+            var tableParts = TsExtrasCommonSqlGen.GetSchemaAndTableName(type);
 
             var sql = new StringBuilder();
 
             sql.Append("INSERT INTO ");
-            sql.Append($"{startQoute}{tableName}{endQoute}");
+            if (!string.IsNullOrEmpty(tableParts.Schema))
+            {
+                sql.Append($"{startQoute}{tableParts.Schema}{endQoute}.");
+            }
+            sql.Append($"{startQoute}{tableParts.Table}{endQoute}");
             sql.AppendLine(" (");
             sql.AppendLine(string.Join(",", setNames.Select(p => $"{startQoute}{p}{endQoute}")));
             sql.AppendLine(" )");

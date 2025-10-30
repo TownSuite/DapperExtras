@@ -71,6 +71,34 @@ INSERT (
     }
     
     [Test]
+    public void SqlServer_Upsert_CustomSchema_Test()
+    {
+        var genSql = new TsExtrasSqlServerAdapter();
+        string sql =
+            genSql.UpSertSqlGeneration<ExampleTable2>(new ExampleTable()
+                {
+                    Id = 123,
+                    Col1 = "abc",
+                    Col2 = "def",
+                    Col3 = DateTime.MinValue
+                }, new { Id = 123 },
+                startQoute: "[", endQoute: "]");
+        Assert.That(sql, Is.EqualTo(@"MERGE INTO 
+[MySchema].[ExampleTable2]
+AS tgt 
+USING
+(SELECT @Id_1 [Id]) AS src 
+ON tgt.[Id]=src.[Id]
+WHEN MATCHED THEN
+UPDATE SET [Col1]=@Col1_2, [Col2]=@Col2_2, [Col3]=@Col3_2
+WHEN NOT MATCHED THEN 
+INSERT (
+[Col1], [Col2], [Col3]) VALUES (
+@Col1_2, @Col2_2, @Col3_2
+);"));
+    }
+    
+    [Test]
     public void SqlServer_Insert_Test()
     {
         var poco = new ExampleTable();
