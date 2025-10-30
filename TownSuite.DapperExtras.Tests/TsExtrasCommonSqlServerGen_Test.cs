@@ -59,7 +59,7 @@ public class TsExtrasCommonSqlServerGen_Test
 [ExampleTable]
 AS tgt 
 USING
-(SELECT @Id_1 Id) AS src 
+(SELECT @Id_1 [Id]) AS src 
 ON tgt.[Id]=src.[Id]
 WHEN MATCHED THEN
 UPDATE SET [Col1]=@Col1_2, [Col2]=@Col2_2, [Col3]=@Col3_2

@@ -78,7 +78,7 @@ namespace TownSuite.DapperExtras
         public override int UpSert<T>(IDbConnection connection, T setParam, object whereParam,
             IDbTransaction transaction = null, int? commandTimeout = null)
         {
-            var sql = UpSertSqlGeneration<T>(setParam, whereParam);
+            var sql = UpSertSqlGeneration<T>(setParam, whereParam, "[", "]");
             var param = TsExtrasCommonSqlGen.Merge(whereParam, setParam);
 
             return connection.Execute(sql.ToString(), param, transaction, commandTimeout: commandTimeout);
@@ -87,7 +87,7 @@ namespace TownSuite.DapperExtras
         public override async Task<int> UpSertAsync<T>(IDbConnection connection, T setParam, object whereParam,
             IDbTransaction transaction = null, int? commandTimeout = null)
         {
-            var sql = UpSertSqlGeneration<T>(setParam, whereParam);
+            var sql = UpSertSqlGeneration<T>(setParam, whereParam, "[", "]"); 
             var param = TsExtrasCommonSqlGen.Merge(whereParam, setParam);
 
             return await connection.ExecuteAsync(sql.ToString(), param, transaction, commandTimeout: commandTimeout);
@@ -127,7 +127,7 @@ namespace TownSuite.DapperExtras
                 sql.Append("@");
                 sql.Append(name);
                 sql.Append("_1 ");
-                sql.Append(name);
+                sql.Append($"{startQoute}{name}{endQoute}");
                 // END SELECT
 
                 // JOIN
