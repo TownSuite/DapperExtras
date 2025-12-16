@@ -14,13 +14,17 @@ public class TownSuiteDapperExtensions_IntegrationTests
     [SetUp]
     public async Task Setup()
     {
+#if ENABLE_TESTCONTAINERS
         await DatabaseTestCases.InitializeAsync();
+#endif
     }
 
     [TearDown]
     public async Task TearDown()
     {
+#if ENABLE_TESTCONTAINERS
         await DatabaseTestCases.DisposeAsync();
+#endif
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
@@ -265,7 +269,7 @@ public class TownSuiteDapperExtensions_IntegrationTests
 
             return connection;
         }
-        
+
         private static SqlConnection CreateSqlServerDatabase()
         {
             var connection = new SqlConnection(_msSqlContainer.GetConnectionString());
@@ -318,8 +322,10 @@ END";
             get
             {
                 yield return CreateSqliteDatabase();
+#if ENABLE_TESTCONTAINERS
                 yield return CreateSqlServerDatabase();
                 yield return CreatePostgreSqlDatabase();
+#endif
             }
         }
     }
