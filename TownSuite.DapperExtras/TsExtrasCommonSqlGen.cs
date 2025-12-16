@@ -48,7 +48,8 @@ namespace TownSuite.DapperExtras
         public abstract Task<int> InsertAsync<T>(IDbConnection connection, object param,
             IDbTransaction transaction = null, int? commandTimeout = null);
         
-        internal string GenerateGetWhereSql<T>(object param, string startQoute = "", string endQoute = "")
+        internal string GenerateGetWhereSql<T>(object param, string startQoute = "", string endQoute = "",
+            string selectHint = "")
         {
             var type = typeof(T);
             var names = new List<string>();
@@ -84,6 +85,7 @@ namespace TownSuite.DapperExtras
                 sql.Append($"{startQoute}{tableNameParts.Schema}{endQoute}.");
             }
             sql.Append($"{startQoute}{tableNameParts.Table}{endQoute}");
+            sql.Append(selectHint);
             sql.Append(" WHERE ");
 
             bool setAnd = false;

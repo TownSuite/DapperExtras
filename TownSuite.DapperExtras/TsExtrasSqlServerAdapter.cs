@@ -11,10 +11,27 @@ namespace TownSuite.DapperExtras
 {
     internal class TsExtrasSqlServerAdapter : TsExtrasCommonSqlGen
     {
+        private readonly DapperExtensionSettings Settings;
+        public TsExtrasSqlServerAdapter()
+        {
+            Settings = new DapperExtensionSettings();
+        }
+
+        public TsExtrasSqlServerAdapter(DapperExtensionSettings settings)
+        {
+            Settings = settings;
+            if (Settings.EnableSqlServerNoLockReads)
+            {
+                hintNoLock = " WITH (NOLOCK) ";
+            }
+        }
+        
+        private readonly string hintNoLock = "";
+        
         public override IEnumerable<T> GetWhere<T>(IDbConnection connection, object param,
             IDbTransaction transaction = null, int? commandTimeout = null)
         {
-            var sql = GenerateGetWhereSql<T>(param, startQoute: "[", endQoute: "]");
+            var sql = GenerateGetWhereSql<T>(param, startQoute: "[", endQoute: "]", selectHint: hintNoLock);
 
             return connection.Query<T>(sql, param, transaction, commandTimeout: commandTimeout);
         }
@@ -22,7 +39,7 @@ namespace TownSuite.DapperExtras
         public override T GetWhereFirstOrDefault<T>(IDbConnection connection, object param,
             IDbTransaction transaction = null, int? commandTimeout = null)
         {
-            var sql = GenerateGetWhereSql<T>(param, startQoute: "[", endQoute: "]");
+            var sql = GenerateGetWhereSql<T>(param, startQoute: "[", endQoute: "]", selectHint: hintNoLock);
 
             return connection.QueryFirstOrDefault<T>(sql, param, transaction, commandTimeout: commandTimeout);
         }
@@ -30,7 +47,7 @@ namespace TownSuite.DapperExtras
         public override async Task<IEnumerable<T>> GetWhereAsync<T>(IDbConnection connection, object param,
             IDbTransaction transaction = null, int? commandTimeout = null)
         {
-            var sql = GenerateGetWhereSql<T>(param, startQoute: "[", endQoute: "]");
+            var sql = GenerateGetWhereSql<T>(param, startQoute: "[", endQoute: "]", selectHint: hintNoLock);
 
             return await connection.QueryAsync<T>(sql, param, transaction, commandTimeout: commandTimeout);
         }
@@ -38,7 +55,7 @@ namespace TownSuite.DapperExtras
         public override async Task<T> GetWhereFirstOrDefaultAsync<T>(IDbConnection connection, object param,
             IDbTransaction transaction = null, int? commandTimeout = null)
         {
-            var sql = GenerateGetWhereSql<T>(param, startQoute: "[", endQoute: "]");
+            var sql = GenerateGetWhereSql<T>(param, startQoute: "[", endQoute: "]", selectHint: hintNoLock);
 
             return await connection.QueryFirstOrDefaultAsync<T>(sql, param, transaction,
                 commandTimeout: commandTimeout);

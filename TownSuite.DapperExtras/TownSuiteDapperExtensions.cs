@@ -8,10 +8,12 @@ namespace TownSuite.DapperExtras
 {
     public static class TownSuiteDapperExtensions
     {
+        public static DapperExtensionSettings Settings { get; set; } = new DapperExtensionSettings();
+        
         private static readonly Dictionary<string, TsExtrasCommonSqlGen> AdapterDictionary
             = new Dictionary<string, TsExtrasCommonSqlGen>(6)
             {
-                ["sqlconnection"] = new TsExtrasSqlServerAdapter(),
+                ["sqlconnection"] = new TsExtrasSqlServerAdapter(Settings),
                 ["npgsqlconnection"] = new TsExtrasPostgreAdapter(),
                 ["sqliteconnection"] = new TsExtrasSqliteAdapter()
             };

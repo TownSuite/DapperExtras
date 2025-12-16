@@ -20,6 +20,17 @@ public class TsExtrasCommonSqlServerGen_Test
     }
 
     [Test]
+    public void SqlServer_GetWhere_WithHints_Test()
+    {
+        var poco = new ExampleTable();
+        var genSql = new TsExtrasSqlServerAdapter();
+        var sql = genSql.GenerateGetWhereSql<ExampleTable>(new { Id = 123 },
+            startQoute: "[", endQoute: "]", selectHint:" WITH (NOLOCK) ");
+
+        Assert.That(sql, Is.EqualTo("SELECT * FROM [ExampleTable] WITH (NOLOCK)  WHERE [Id]=@Id;"));
+    }
+
+    [Test]
     public void SqlServer_UpdateWhere_Test()
     {
         var poco = new ExampleTable();
@@ -48,12 +59,12 @@ public class TsExtrasCommonSqlServerGen_Test
         var genSql = new TsExtrasSqlServerAdapter();
         string sql =
             genSql.UpSertSqlGeneration<ExampleTable>(new ExampleTable()
-            {
-                Id = 123,
-                Col1 = "abc",
-                Col2 = "def",
-                Col3 = DateTime.MinValue
-            }, new { Id = 123 },
+                {
+                    Id = 123,
+                    Col1 = "abc",
+                    Col2 = "def",
+                    Col3 = DateTime.MinValue
+                }, new { Id = 123 },
                 startQoute: "[", endQoute: "]");
         Assert.That(sql, Is.EqualTo(@"MERGE INTO 
 [ExampleTable]
@@ -69,7 +80,7 @@ INSERT (
 @Col1_2, @Col2_2, @Col3_2
 );"));
     }
-    
+
     [Test]
     public void SqlServer_Upsert_CustomSchema_Test()
     {
@@ -97,7 +108,7 @@ INSERT (
 @Col1_2, @Col2_2, @Col3_2
 );"));
     }
-    
+
     [Test]
     public void SqlServer_Insert_Test()
     {
@@ -117,14 +128,14 @@ Col1,Col2,Col3
 VALUES (
 @Col1, @Col2, @Col3);"));
     }
-    
+
     [Test]
     public void SqlServer_Insert2_Test()
     {
         var poco = new ExampleTable();
         var genSql = new TsExtrasSqlServerAdapter();
         var sql =
-            genSql.InsertGeneration<ExampleTable>(new 
+            genSql.InsertGeneration<ExampleTable>(new
             {
                 Id = 123,
                 Col1 = "abc",
