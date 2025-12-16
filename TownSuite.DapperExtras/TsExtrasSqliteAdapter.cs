@@ -79,7 +79,7 @@ namespace TownSuite.DapperExtras
             IDbTransaction transaction = null, int? commandTimeout = null)
         {
             var sql = UpSertSqlGeneration<T>(setParam, whereParam, startQoute: "\"", endQoute: "\"");
-            var param = TsExtrasCommonSqlGen.Merge(whereParam, setParam);
+            var param = TsExtrasCommonSqlGen.Merge(setParam, whereParam);
 
             return connection.Execute(sql.ToString(), param, transaction, commandTimeout: commandTimeout);
         }
