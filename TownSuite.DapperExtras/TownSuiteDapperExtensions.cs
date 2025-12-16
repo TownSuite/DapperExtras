@@ -131,6 +131,7 @@ namespace TownSuite.DapperExtras
                     var propType = prop.PropertyType;
                     if (SqlMapper.HasTypeHandler(propType))
                     {
+                        // TODO: better handling for type handlers
                         var value = prop.GetValue(param, null).ToString();
                         var parameter = cmd.CreateParameter();
                         parameter.ParameterName = $"@{prop.Name}";
@@ -151,6 +152,78 @@ namespace TownSuite.DapperExtras
             return ExecuteCmdTable(cmd);
         }
 
+
+        public static Task<DataTable> QueryDtAsync(this IDbConnection connection, string sql, object param = null,
+            IDbTransaction transaction = null, int? commandTimeout = null,
+            CommandType commandType = CommandType.Text)
+        {
+            var cmd = connection.CreateCommand();
+            cmd.Connection = connection;
+            cmd.CommandType = commandType;
+            cmd.CommandText = sql;
+            cmd.Transaction = transaction;
+            if (commandTimeout.HasValue)
+            {
+                cmd.CommandTimeout = commandTimeout.Value;
+            }
+
+            if (param != null)
+            {
+                var props = param.GetType().GetProperties();
+                foreach (var prop in props)
+                {
+                    var propType = prop.PropertyType;
+                    if (SqlMapper.HasTypeHandler(propType))
+                    {
+                        // TODO: better handling for type handlers in async
+                        var value = prop.GetValue(param, null).ToString();
+                        var parameter = cmd.CreateParameter();
+                        parameter.ParameterName = $"@{prop.Name}";
+                        parameter.Value = value;
+                        cmd.Parameters.Add(parameter);
+                    }
+                    else
+                    {
+                        var value = prop.GetValue(param, null);
+                        var parameter = cmd.CreateParameter();
+                        parameter.ParameterName = $"@{prop.Name}";
+                        parameter.Value = value;
+                        cmd.Parameters.Add(parameter);
+                    }
+                }
+            }
+
+            return ExecuteCmdTableAsync(cmd);
+        }
+
+        private static async Task<DataTable> ExecuteCmdTableAsync(IDbCommand cmd)
+        {
+            System.Data.ConnectionState origSate = cmd.Connection.State;
+            if (cmd.Connection.State == ConnectionState.Closed)
+            {
+                cmd.Connection.Open();
+            }
+
+            if (cmd is DbCommand dbCommand)
+            {
+                using (var drSqlDataReader = await dbCommand.ExecuteReaderAsync())
+                {
+                    DataTable dt = new DataTable();
+                    dt.Load(drSqlDataReader);
+                    drSqlDataReader.Close();
+
+                    if (origSate == ConnectionState.Closed)
+                    {
+                        cmd.Connection.Close();
+                    }
+
+                    return dt;
+                }
+            }
+
+            return ExecuteCmdTable(cmd);
+        }
+
         private static DataTable ExecuteCmdTable(IDbCommand cmd)
         {
             var origSate = cmd.Connection.State;
@@ -159,10 +232,10 @@ namespace TownSuite.DapperExtras
                 cmd.Connection.Open();
             }
 
-            var MainDatatable = new DataTable();
+            var dt = new DataTable();
             using (var drSqlDataReader = cmd.ExecuteReader())
             {
-                MainDatatable.Load(drSqlDataReader);
+                dt.Load(drSqlDataReader);
                 drSqlDataReader.Close();
             }
 
@@ -171,7 +244,7 @@ namespace TownSuite.DapperExtras
                 cmd.Connection.Close();
             }
 
-            return MainDatatable;
+            return dt;
         }
     }
 }

@@ -213,6 +213,24 @@ public class TownSuiteDapperExtensions_IntegrationTests
 
         var id = new CustomId { Id = 1 };
         DataTable dt = connection.QueryDt("select * from exampletable where id=@Id", new { Id = id });
+        Assert.That(dt.Rows.Count, Is.EqualTo(1));
+        DataRow row = dt.Rows[0];
+        Assert.That(row["Col1"], Is.EqualTo("Value1"));
+        Assert.That(row["Col2"], Is.EqualTo("ValueA"));
+        Assert.That(row["Col3"], Is.EqualTo("2024-01-01"));
+        
+        DataTable dt2 = await connection.QueryDtAsync("select * from exampletable where id=@Id", new { Id = id });
+        Assert.That(dt2.Rows.Count, Is.EqualTo(1));
+        DataRow row2 = dt2.Rows[0];
+        Assert.That(row2["Col1"], Is.EqualTo("Value1"));
+        Assert.That(row2["Col2"], Is.EqualTo("ValueA"));
+        Assert.That(row2["Col3"], Is.EqualTo("2024-01-01"));
+    }
+
+    [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
+    public async Task QueryDtAsync_Test(IDbConnection connection)
+    {
+        DataTable dt = await connection.QueryDtAsync("select * from exampletable where id=@Id", new { Id = 1 });
 
         Assert.That(dt.Rows.Count, Is.EqualTo(1));
         DataRow row = dt.Rows[0];
