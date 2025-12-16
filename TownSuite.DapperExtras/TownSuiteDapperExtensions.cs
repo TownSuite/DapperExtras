@@ -2,6 +2,7 @@
 using System.Data;
 using System.Threading.Tasks;
 using System.Data.Common;
+using Dapper;
 
 namespace TownSuite.DapperExtras
 {
@@ -37,14 +38,14 @@ namespace TownSuite.DapperExtras
             var adapter = GetAdapter(connection);
             return adapter.GetWhereFirstOrDefault<T>(connection, param, transaction, commandTimeout);
         }
-        
+
         public static async Task<IEnumerable<T>> GetWhereAsync<T>(this IDbConnection connection, object param,
             IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
             var adapter = GetAdapter(connection);
             return await adapter.GetWhereAsync<T>(connection, param, transaction, commandTimeout);
         }
-        
+
         public static async Task<T> GetWhereFirstOrDefaultAsync<T>(this IDbConnection connection, object param,
             IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
@@ -93,7 +94,7 @@ namespace TownSuite.DapperExtras
             var adapter = GetAdapter(connection);
             return await adapter.UpSertAsync<T>(connection, setParam, whereParam, transaction, commandTimeout);
         }
-        
+
         public static int TsInsert<T>(this IDbConnection connection, object param,
             IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
@@ -127,11 +128,23 @@ namespace TownSuite.DapperExtras
                 var props = param.GetType().GetProperties();
                 foreach (var prop in props)
                 {
-                    var value = prop.GetValue(param, null);
-                    var parameter = cmd.CreateParameter();
-                    parameter.ParameterName = $"@{prop.Name}";
-                    parameter.Value = value;
-                    cmd.Parameters.Add(parameter);
+                    var propType = prop.PropertyType;
+                    if (SqlMapper.HasTypeHandler(propType))
+                    {
+                        var value = prop.GetValue(param, null).ToString();
+                        var parameter = cmd.CreateParameter();
+                        parameter.ParameterName = $"@{prop.Name}";
+                        parameter.Value = value;
+                        cmd.Parameters.Add(parameter);
+                    }
+                    else
+                    {
+                        var value = prop.GetValue(param, null);
+                        var parameter = cmd.CreateParameter();
+                        parameter.ParameterName = $"@{prop.Name}";
+                        parameter.Value = value;
+                        cmd.Parameters.Add(parameter);
+                    }
                 }
             }
 
