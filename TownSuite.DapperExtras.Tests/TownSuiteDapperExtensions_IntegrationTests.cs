@@ -152,5 +152,62 @@ public class TownSuiteDapperExtensions_IntegrationTests
         var row = await connection.QueryFirstOrDefaultAsync<ExampleTable>("select * from ExampleTable where Id=@Id", new { Id = 7 });
         Assert.That(row, Is.Not.Null);
     }
-}
 
+    // NEW TESTS START HERE: GetWhere, GetWhereFirstOrDefault, UpdateWhere, UpdateWhereAsync, QueryDt, QueryDtAsync
+
+    [Test]
+    public void GetWhere_ReturnsMatchingRows_Sync_Test()
+    {
+        using var connection = CreateSqliteDatabase();
+        var results = connection.GetWhere<ExampleTable>(new { Col1 = "Value1" });
+        Assert.That(results.Count(), Is.EqualTo(1));
+        var first = results.First();
+        Assert.That(first.Col2, Is.EqualTo("ValueA"));
+    }
+
+    [Test]
+    public void GetWhereFirstOrDefault_ReturnsSingle_Sync_Test()
+    {
+        using var connection = CreateSqliteDatabase();
+        var result = connection.GetWhereFirstOrDefault<ExampleTable>(new { Id = 2 });
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Col1, Is.EqualTo("Value2"));
+    }
+
+    [Test]
+    public void UpdateWhere_UpdatesRow_Sync_Test()
+    {
+        using var connection = CreateSqliteDatabase();
+        connection.UpdateWhere<ExampleTable>(new { Col1 = "UpdatedSync" }, new { Id = 1 });
+        var row = connection.QueryFirstOrDefault<ExampleTable>("select * from ExampleTable where Id=@Id", new { Id = 1 });
+        Assert.That(row.Col1, Is.EqualTo("UpdatedSync"));
+    }
+
+    [Test]
+    public async Task UpdateWhereAsync_UpdatesRow_Async_Test()
+    {
+        await using var connection = CreateSqliteDatabase();
+        await connection.UpdateWhereAsync<ExampleTable>(new { Col2 = "UpdatedAsync2" }, new { Id = 2 });
+        var row = await connection.QueryFirstOrDefaultAsync<ExampleTable>("select * from ExampleTable where Id=@Id", new { Id = 2 });
+        Assert.That(row.Col2, Is.EqualTo("UpdatedAsync2"));
+    }
+
+    [Test]
+    public void QueryDt_ReturnsDataTable_Sync_Test()
+    {
+        using var connection = CreateSqliteDatabase();
+        var dt = connection.QueryDt("select * from ExampleTable where Id=@Id", new { Id = 1 });
+        Assert.That(dt.Rows.Count, Is.EqualTo(1));
+        Assert.That(dt.Rows[0]["Col1"].ToString(), Is.EqualTo("Value1"));
+    }
+
+    [Test]
+    public async Task QueryDtAsync_ReturnsDataTable_Async_Test()
+    {
+        await using var connection = CreateSqliteDatabase();
+        var dt = await connection.QueryDtAsync("select * from ExampleTable where Id=@Id", new { Id = 3 });
+        Assert.That(dt.Rows.Count, Is.EqualTo(1));
+        Assert.That(dt.Rows[0]["Col1"].ToString(), Is.EqualTo("Value3"));
+    }
+
+}
