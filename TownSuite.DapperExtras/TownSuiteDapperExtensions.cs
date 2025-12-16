@@ -132,53 +132,55 @@ namespace TownSuite.DapperExtras
                 var props = param.GetType().GetProperties();
                 foreach (var prop in props)
                 {
-                    var propType = prop.PropertyType;
-                    var valueObj = prop.GetValue(param, null);
-
-                    if (SqlMapper.HasTypeHandler(propType))
-                    {
-                        var handlerObj = GetDapperTypeHandler(propType);
-                        if (handlerObj != null)
-                        {
-                            var dbParam = (IDbDataParameter)cmd.CreateParameter();
-                            dbParam.ParameterName = $"@{prop.Name}";
-
-                            // invoke SetValue(handler) via reflection to let the handler set DbType/Value/etc.
-                            var setValueMethod = handlerObj.GetType()
-                                .GetMethod("SetValue", BindingFlags.Public | BindingFlags.Instance);
-                            if (setValueMethod != null)
-                            {
-                                setValueMethod.Invoke(handlerObj, new object[] { dbParam, valueObj });
-                            }
-                            else
-                            {
-                                dbParam.Value = valueObj ?? DBNull.Value;
-                            }
-
-                            cmd.Parameters.Add(dbParam);
-                            continue;
-                        }
-
-                        // fallback if no handler instance available
-                        var fallbackParam = cmd.CreateParameter();
-                        fallbackParam.ParameterName = $"@{prop.Name}";
-                        fallbackParam.Value = valueObj?.ToString();
-                        cmd.Parameters.Add(fallbackParam);
-                    }
-                    else
-                    {
-                        var value = prop.GetValue(param, null);
-                        var parameter = cmd.CreateParameter();
-                        parameter.ParameterName = $"@{prop.Name}";
-                        parameter.Value = value;
-                        cmd.Parameters.Add(parameter);
-                    }
+                    var dbParam = CreateDbParameter(cmd, param, prop);
+                    cmd.Parameters.Add(dbParam);
                 }
             }
 
             return ExecuteCmdTable(cmd);
         }
 
+
+        private static IDbDataParameter CreateDbParameter(IDbCommand cmd, object param, PropertyInfo prop)
+        {
+            var propType = prop.PropertyType;
+            var valueObj = prop.GetValue(param, null);
+
+            if (SqlMapper.HasTypeHandler(propType))
+            {
+                var handlerObj = GetDapperTypeHandler(propType);
+                if (handlerObj != null)
+                {
+                    var dbParam = (IDbDataParameter)cmd.CreateParameter();
+                    dbParam.ParameterName = $"@{prop.Name}";
+
+                    // invoke SetValue(handler) via reflection to let the handler set DbType/Value/etc.
+                    var setValueMethod = handlerObj.GetType()
+                        .GetMethod("SetValue", BindingFlags.Public | BindingFlags.Instance);
+                    if (setValueMethod != null)
+                    {
+                        setValueMethod.Invoke(handlerObj, new object[] { dbParam, valueObj });
+                    }
+                    else
+                    {
+                        dbParam.Value = valueObj ?? DBNull.Value;
+                    }
+                    return dbParam;
+                }
+
+                // fallback if no handler instance available
+                var fallbackParam = cmd.CreateParameter();
+                fallbackParam.ParameterName = $"@{prop.Name}";
+                fallbackParam.Value = valueObj?.ToString();
+                return fallbackParam;
+            }
+
+            var value = prop.GetValue(param, null);
+            var parameter = cmd.CreateParameter();
+            parameter.ParameterName = $"@{prop.Name}";
+            parameter.Value = value;
+            return parameter;
+        }
 
         public static Task<DataTable> QueryDtAsync(this IDbConnection connection, string sql, object param = null,
             IDbTransaction transaction = null, int? commandTimeout = null,
@@ -199,47 +201,8 @@ namespace TownSuite.DapperExtras
                 var props = param.GetType().GetProperties();
                 foreach (var prop in props)
                 {
-                    var propType = prop.PropertyType;
-                    var valueObj = prop.GetValue(param, null);
-
-                    if (SqlMapper.HasTypeHandler(propType))
-                    {
-                        var handlerObj = GetDapperTypeHandler(propType);
-                        if (handlerObj != null)
-                        {
-                            var dbParam = (IDbDataParameter)cmd.CreateParameter();
-                            dbParam.ParameterName = $"@{prop.Name}";
-
-                            // invoke SetValue(handler) via reflection to let the handler set DbType/Value/etc.
-                            var setValueMethod = handlerObj.GetType()
-                                .GetMethod("SetValue", BindingFlags.Public | BindingFlags.Instance);
-                            if (setValueMethod != null)
-                            {
-                                setValueMethod.Invoke(handlerObj, new object[] { dbParam, valueObj });
-                            }
-                            else
-                            {
-                                dbParam.Value = valueObj ?? DBNull.Value;
-                            }
-
-                            cmd.Parameters.Add(dbParam);
-                            continue;
-                        }
-
-                        // fallback if no handler instance available
-                        var fallbackParam = cmd.CreateParameter();
-                        fallbackParam.ParameterName = $"@{prop.Name}";
-                        fallbackParam.Value = valueObj?.ToString();
-                        cmd.Parameters.Add(fallbackParam);
-                    }
-                    else
-                    {
-                        var value = prop.GetValue(param, null);
-                        var parameter = cmd.CreateParameter();
-                        parameter.ParameterName = $"@{prop.Name}";
-                        parameter.Value = value;
-                        cmd.Parameters.Add(parameter);
-                    }
+                    var dbParam = CreateDbParameter(cmd, param, prop);
+                    cmd.Parameters.Add(dbParam);
                 }
             }
 
