@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using System.Data.Common;
+using System.Reflection;
 using Dapper;
 
 namespace TownSuite.DapperExtras
@@ -9,7 +11,7 @@ namespace TownSuite.DapperExtras
     public static class TownSuiteDapperExtensions
     {
         public static DapperExtensionSettings Settings { get; set; } = new DapperExtensionSettings();
-        
+
         private static readonly Dictionary<string, TsExtrasCommonSqlGen> AdapterDictionary
             = new Dictionary<string, TsExtrasCommonSqlGen>(6)
             {
@@ -131,14 +133,37 @@ namespace TownSuite.DapperExtras
                 foreach (var prop in props)
                 {
                     var propType = prop.PropertyType;
+                    var valueObj = prop.GetValue(param, null);
+
                     if (SqlMapper.HasTypeHandler(propType))
                     {
-                        // TODO: better handling for type handlers
-                        var value = prop.GetValue(param, null).ToString();
-                        var parameter = cmd.CreateParameter();
-                        parameter.ParameterName = $"@{prop.Name}";
-                        parameter.Value = value;
-                        cmd.Parameters.Add(parameter);
+                        var handlerObj = GetDapperTypeHandler(propType);
+                        if (handlerObj != null)
+                        {
+                            var dbParam = (IDbDataParameter)cmd.CreateParameter();
+                            dbParam.ParameterName = $"@{prop.Name}";
+
+                            // invoke SetValue(handler) via reflection to let the handler set DbType/Value/etc.
+                            var setValueMethod = handlerObj.GetType()
+                                .GetMethod("SetValue", BindingFlags.Public | BindingFlags.Instance);
+                            if (setValueMethod != null)
+                            {
+                                setValueMethod.Invoke(handlerObj, new object[] { dbParam, valueObj });
+                            }
+                            else
+                            {
+                                dbParam.Value = valueObj ?? DBNull.Value;
+                            }
+
+                            cmd.Parameters.Add(dbParam);
+                            continue;
+                        }
+
+                        // fallback if no handler instance available
+                        var fallbackParam = cmd.CreateParameter();
+                        fallbackParam.ParameterName = $"@{prop.Name}";
+                        fallbackParam.Value = valueObj?.ToString();
+                        cmd.Parameters.Add(fallbackParam);
                     }
                     else
                     {
@@ -175,14 +200,37 @@ namespace TownSuite.DapperExtras
                 foreach (var prop in props)
                 {
                     var propType = prop.PropertyType;
+                    var valueObj = prop.GetValue(param, null);
+
                     if (SqlMapper.HasTypeHandler(propType))
                     {
-                        // TODO: better handling for type handlers in async
-                        var value = prop.GetValue(param, null).ToString();
-                        var parameter = cmd.CreateParameter();
-                        parameter.ParameterName = $"@{prop.Name}";
-                        parameter.Value = value;
-                        cmd.Parameters.Add(parameter);
+                        var handlerObj = GetDapperTypeHandler(propType);
+                        if (handlerObj != null)
+                        {
+                            var dbParam = (IDbDataParameter)cmd.CreateParameter();
+                            dbParam.ParameterName = $"@{prop.Name}";
+
+                            // invoke SetValue(handler) via reflection to let the handler set DbType/Value/etc.
+                            var setValueMethod = handlerObj.GetType()
+                                .GetMethod("SetValue", BindingFlags.Public | BindingFlags.Instance);
+                            if (setValueMethod != null)
+                            {
+                                setValueMethod.Invoke(handlerObj, new object[] { dbParam, valueObj });
+                            }
+                            else
+                            {
+                                dbParam.Value = valueObj ?? DBNull.Value;
+                            }
+
+                            cmd.Parameters.Add(dbParam);
+                            continue;
+                        }
+
+                        // fallback if no handler instance available
+                        var fallbackParam = cmd.CreateParameter();
+                        fallbackParam.ParameterName = $"@{prop.Name}";
+                        fallbackParam.Value = valueObj?.ToString();
+                        cmd.Parameters.Add(fallbackParam);
                     }
                     else
                     {
@@ -247,6 +295,51 @@ namespace TownSuite.DapperExtras
             }
 
             return dt;
+        }
+
+        // Reflection helper: try public method first, then private/internal fields/methods to find a registered handler instance.
+        private static object GetDapperTypeHandler(Type t)
+        {
+            var mapperType = typeof(SqlMapper);
+
+            // try public or non-public static method GetTypeHandler(Type)
+            var method = mapperType.GetMethod("GetTypeHandler", BindingFlags.Public | BindingFlags.Static)
+                         ?? mapperType.GetMethod("GetTypeHandler", BindingFlags.NonPublic | BindingFlags.Static);
+            if (method != null)
+            {
+                try
+                {
+                    return method.Invoke(null, new object[] { t });
+                }
+                catch
+                {
+                    // ignore and fallthrough to field-based lookup
+                }
+            }
+
+            // common internal field names used in different Dapper versions
+            var candidateFieldNames = new[] { "typeHandlers", "handlers", "typeHandlerCache", "TypeHandlerCache" };
+            foreach (var name in candidateFieldNames)
+            {
+                var field = mapperType.GetField(name,
+                    BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public);
+                if (field == null) continue;
+                var dict = field.GetValue(null) as System.Collections.IDictionary;
+                if (dict == null) continue;
+
+                if (dict.Contains(t))
+                {
+                    return dict[t];
+                }
+
+                foreach (System.Collections.DictionaryEntry de in dict)
+                {
+                    if (de.Key is Type keyType && keyType == t)
+                        return de.Value;
+                }
+            }
+
+            return null;
         }
     }
 }
