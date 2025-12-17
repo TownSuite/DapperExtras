@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net6.0;net8.0;net10.0</TargetFrameworks>
-    <Version>1.0.18</Version>
-    <AssemblyVersion>1.0.18</AssemblyVersion>
-    <FileVersion>1.0.18</FileVersion>
+    <Version>1.0.19</Version>
+    <AssemblyVersion>1.0.19</AssemblyVersion>
+    <FileVersion>1.0.19</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company>TownSuite Muncipal Software Inc.</Company>
     <Authors>TownSuite</Authors>
