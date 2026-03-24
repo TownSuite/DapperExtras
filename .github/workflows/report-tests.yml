@@ -11,7 +11,7 @@ jobs:
       checks: write
     runs-on: ubuntu-latest
     steps:
-      - uses: dorny/test-reporter@v2
+      - uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
         with:
           artifact: test-results # artifact name
           name: NUnit Tests # Name of the check run which will be created
