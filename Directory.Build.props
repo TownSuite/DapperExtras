@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+      <Version>26.0.0</Version>
+      <AssemblyVersion>26.0.0</AssemblyVersion>
+      <FileVersion>26.0.0</FileVersion>
+      <Deterministic>true</Deterministic>
+      <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+      <Company>TownSuite Municipal Software Inc.</Company>
+      <Product>TownSuite Dapper Extensions</Product>
+      <Copyright>Copyright © TownSuite Municipal Software Inc. 2026</Copyright>
+  </PropertyGroup>
+   <PropertyGroup Condition=" '$(NUGET_CONFIG_FILE)' != '' ">
+    <RestoreConfigFile>$(NUGET_CONFIG_FILE)</RestoreConfigFile>
+  </PropertyGroup>
+</Project>

@@ -1,17 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net6.0;net8.0;net10.0</TargetFrameworks>
-    <Version>1.0.19</Version>
-    <AssemblyVersion>1.0.19</AssemblyVersion>
-    <FileVersion>1.0.19</FileVersion>
+    <TargetFrameworks>netstandard2.0;net8.0;net10.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Company>TownSuite Muncipal Software Inc.</Company>
     <Authors>TownSuite</Authors>
     <Description>Extra dapper extensions.</Description>
     <PackageTags>dapper docker micro-orm</PackageTags>
     <PackageId>TownSuite.DapperExtras</PackageId>
-    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
