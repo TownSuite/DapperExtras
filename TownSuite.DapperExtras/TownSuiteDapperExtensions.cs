@@ -117,27 +117,29 @@ namespace TownSuite.DapperExtras
             IDbTransaction transaction = null, int? commandTimeout = null,
             CommandType commandType = CommandType.Text)
         {
-            var cmd = connection.CreateCommand();
-            cmd.Connection = connection;
-            cmd.CommandType = commandType;
-            cmd.CommandText = sql;
-            cmd.Transaction = transaction;
-            if (commandTimeout.HasValue)
+            using (var cmd = connection.CreateCommand())
             {
-                cmd.CommandTimeout = commandTimeout.Value;
-            }
-
-            if (param != null)
-            {
-                var props = param.GetType().GetProperties();
-                foreach (var prop in props)
+                cmd.Connection = connection;
+                cmd.CommandType = commandType;
+                cmd.CommandText = sql;
+                cmd.Transaction = transaction;
+                if (commandTimeout.HasValue)
                 {
-                    var dbParam = CreateDbParameter(cmd, param, prop);
-                    cmd.Parameters.Add(dbParam);
+                    cmd.CommandTimeout = commandTimeout.Value;
                 }
-            }
 
-            return ExecuteCmdTable(cmd);
+                if (param != null)
+                {
+                    var props = param.GetType().GetProperties();
+                    foreach (var prop in props)
+                    {
+                        var dbParam = CreateDbParameter(cmd, param, prop);
+                        cmd.Parameters.Add(dbParam);
+                    }
+                }
+
+                return ExecuteCmdTable(cmd);
+            }
         }
 
 
@@ -186,27 +188,29 @@ namespace TownSuite.DapperExtras
             IDbTransaction transaction = null, int? commandTimeout = null,
             CommandType commandType = CommandType.Text)
         {
-            var cmd = connection.CreateCommand();
-            cmd.Connection = connection;
-            cmd.CommandType = commandType;
-            cmd.CommandText = sql;
-            cmd.Transaction = transaction;
-            if (commandTimeout.HasValue)
+            using (var cmd = connection.CreateCommand())
             {
-                cmd.CommandTimeout = commandTimeout.Value;
-            }
-
-            if (param != null)
-            {
-                var props = param.GetType().GetProperties();
-                foreach (var prop in props)
+                cmd.Connection = connection;
+                cmd.CommandType = commandType;
+                cmd.CommandText = sql;
+                cmd.Transaction = transaction;
+                if (commandTimeout.HasValue)
                 {
-                    var dbParam = CreateDbParameter(cmd, param, prop);
-                    cmd.Parameters.Add(dbParam);
+                    cmd.CommandTimeout = commandTimeout.Value;
                 }
-            }
 
-            return ExecuteCmdTableAsync(cmd);
+                if (param != null)
+                {
+                    var props = param.GetType().GetProperties();
+                    foreach (var prop in props)
+                    {
+                        var dbParam = CreateDbParameter(cmd, param, prop);
+                        cmd.Parameters.Add(dbParam);
+                    }
+                }
+
+                return ExecuteCmdTableAsync(cmd);
+            }
         }
 
         private static async Task<DataTable> ExecuteCmdTableAsync(IDbCommand cmd)
