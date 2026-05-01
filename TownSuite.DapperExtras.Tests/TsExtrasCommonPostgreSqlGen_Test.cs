@@ -62,6 +62,29 @@ UPDATE  SET Id=EXCLUDED.Id, Col1=EXCLUDED.Col1, Col2=EXCLUDED.Col2, Col3=EXCLUDE
     }
     
     [Test]
+    public void Postgresql_Upsert_CustomSchema_Test()
+    {
+        var genSql = new TsExtrasPostgreAdapter();
+        string sql =
+            genSql.UpSertSqlGeneration<ExampleTable2>(new ExampleTable()
+                {
+                    Id = 123,
+                    Col1 = "abc",
+                    Col2 = "def",
+                    Col3 = DateTime.MinValue
+                }, new { Id = 123 },
+                startQoute: "", endQoute: "");
+        Assert.That(sql, Is.EqualTo(@"INSERT INTO MySchema.ExampleTable2 (
+Id,Col1,Col2,Col3
+ )
+VALUES (
+@Id_1, @Col1_1, @Col2_1, @Col3_1)
+ON CONFLICT (Id) 
+DO 
+UPDATE  SET Id=EXCLUDED.Id, Col1=EXCLUDED.Col1, Col2=EXCLUDED.Col2, Col3=EXCLUDED.Col3;"));
+    }
+    
+    [Test]
     public void Postgresql_Insert_Test()
     {
         var poco = new ExampleTable();
