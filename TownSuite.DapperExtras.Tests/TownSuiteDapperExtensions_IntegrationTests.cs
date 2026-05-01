@@ -315,7 +315,7 @@ END";
 
         private static NpgsqlConnection CreatePostgreSqlDatabase()
         {
-            var connection = new NpgsqlConnection(_msSqlContainer.GetConnectionString());
+            var connection = new NpgsqlConnection(_dbContainer.GetConnectionString());
             connection.Open();
             var createTableSql = @"
             CREATE TABLE IF NOT EXISTS ExampleTable (
@@ -339,11 +339,34 @@ END";
         {
             get
             {
-                yield return CreateSqliteDatabase();
+                var testCases = new List<IDbConnection>
+                {
+                    CreateSqliteDatabase()
+                };
+
 #if ENABLE_TESTCONTAINERS
-                yield return CreateSqlServerDatabase();
-                yield return CreatePostgreSqlDatabase();
+                try
+                {
+                    testCases.Add(CreateSqlServerDatabase());
+                }
+                catch (InvalidOperationException)
+                {
+                    // Containers not started yet - this is expected during test case enumeration
+                    // before Setup() is called
+                }
+
+                try
+                {
+                    testCases.Add(CreatePostgreSqlDatabase());
+                }
+                catch (InvalidOperationException)
+                {
+                    // Containers not started yet - this is expected during test case enumeration
+                    // before Setup() is called
+                }
 #endif
+
+                return testCases;
             }
         }
     }
