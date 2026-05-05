@@ -72,6 +72,8 @@ namespace TownSuite.DapperExtras
 
                 foreach (var prop in props)
                 {
+                    if (prop.GetCustomAttributes(true).Any(a => a.GetType().Name == "ComputedAttribute"))
+                        continue;
                     names.Add(prop.Name);
                 }
             }
@@ -180,11 +182,15 @@ namespace TownSuite.DapperExtras
             var result = expando as IDictionary<string, object>;
             foreach (System.Reflection.PropertyInfo fi in item1.GetType().GetProperties())
             {
+                if (fi.GetCustomAttributes(true).Any(a => a.GetType().Name == "ComputedAttribute"))
+                    continue;
                 result[fi.Name + "_1"] = fi.GetValue(item1, null);
             }
 
             foreach (System.Reflection.PropertyInfo fi in item2.GetType().GetProperties())
             {
+                if (fi.GetCustomAttributes(true).Any(a => a.GetType().Name == "ComputedAttribute"))
+                    continue;
                 result[fi.Name + "_2"] = fi.GetValue(item2, null);
             }
 
@@ -261,6 +267,9 @@ namespace TownSuite.DapperExtras
             bool setAnd = false;
             foreach (var prop in props)
             {
+                if (prop.GetCustomAttributes(true).Any(a => a.GetType().Name == "ComputedAttribute"))
+                    continue;
+
                 if (setAnd)
                 {
                     sql.Append(" AND ");

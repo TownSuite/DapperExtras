@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Data.Common;
 using System.Reflection;
 using Dapper;
+using System.Linq;
 
 namespace TownSuite.DapperExtras
 {
@@ -133,6 +134,8 @@ namespace TownSuite.DapperExtras
                     var props = param.GetType().GetProperties();
                     foreach (var prop in props)
                     {
+                        if (prop.GetCustomAttributes(true).Any(a => a.GetType().Name == "ComputedAttribute"))
+                            continue;
                         var dbParam = CreateDbParameter(cmd, param, prop);
                         cmd.Parameters.Add(dbParam);
                     }
@@ -211,6 +214,8 @@ namespace TownSuite.DapperExtras
                     var props = param.GetType().GetProperties();
                     foreach (var prop in props)
                     {
+                        if (prop.GetCustomAttributes(true).Any(a => a.GetType().Name == "ComputedAttribute"))
+                            continue;
                         var dbParam = CreateDbParameter(cmd, param, prop);
                         cmd.Parameters.Add(dbParam);
                     }

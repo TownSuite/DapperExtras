@@ -76,8 +76,8 @@ WHEN MATCHED THEN
 UPDATE SET [Col1]=@Col1_2, [Col2]=@Col2_2, [Col3]=@Col3_2
 WHEN NOT MATCHED THEN 
 INSERT (
-[Col1], [Col2], [Col3]) VALUES (
-@Col1_2, @Col2_2, @Col3_2
+[Id], [Col1], [Col2], [Col3]) VALUES (
+@Id_1, @Col1_2, @Col2_2, @Col3_2
 );"));
     }
 
@@ -104,8 +104,8 @@ WHEN MATCHED THEN
 UPDATE SET [Col1]=@Col1_2, [Col2]=@Col2_2, [Col3]=@Col3_2
 WHEN NOT MATCHED THEN 
 INSERT (
-[Col1], [Col2], [Col3]) VALUES (
-@Col1_2, @Col2_2, @Col3_2
+[Id], [Col1], [Col2], [Col3]) VALUES (
+@Id_1, @Col1_2, @Col2_2, @Col3_2
 );"));
     }
 

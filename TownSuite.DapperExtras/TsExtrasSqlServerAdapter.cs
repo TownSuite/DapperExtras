@@ -192,6 +192,26 @@ namespace TownSuite.DapperExtras
             bool setComma3 = false;
             var sbInsertValues = new StringBuilder();
             sbInsertValues.AppendLine(") VALUES (");
+
+            // Include key columns (from whereNames, using _1-suffixed params)
+            foreach (var name in whereNames)
+            {
+                if (setComma3)
+                {
+                    sql.Append(", ");
+                    sbInsertValues.Append(", ");
+                }
+
+                sql.Append($"{startQoute}{name}{endQoute}");
+
+                sbInsertValues.Append("@");
+                sbInsertValues.Append(name);
+                sbInsertValues.Append("_1");
+
+                setComma3 = true;
+            }
+
+            // Include non-key columns (from setNames, using _2-suffixed params)
             foreach (var name in setNames)
             {
                 if (setComma3)
@@ -200,7 +220,6 @@ namespace TownSuite.DapperExtras
                     sbInsertValues.Append(", ");
                 }
 
-                // SELECT
                 sql.Append($"{startQoute}{name}{endQoute}");
 
                 sbInsertValues.Append("@");
