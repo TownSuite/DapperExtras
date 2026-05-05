@@ -200,7 +200,9 @@ namespace TownSuite.DapperExtras
         protected static void ParameterNameList(object setParam, List<string> setNames, bool includeKeyColumn=true)
         {
             var computedProperties = setParam.GetType().GetProperties().Where(p => p.GetCustomAttributes(true).Any(a => a.GetType().Name == "ComputedAttribute")).ToList();
+            // [Key] = identity/auto-increment (DB generates value); [ExplicitKey] = value supplied by code
             var keyProperties = setParam.GetType().GetProperties().Where(p => p.GetCustomAttributes(true).Any(a => a.GetType().Name == "KeyAttribute")).ToList();
+            var explicitKeyProperties = setParam.GetType().GetProperties().Where(p => p.GetCustomAttributes(true).Any(a => a.GetType().Name == "ExplicitKeyAttribute")).ToList();
 
             
             if (setParam.GetType() == typeof(DynamicParameters))
@@ -208,14 +210,14 @@ namespace TownSuite.DapperExtras
                 var p = (DynamicParameters)setParam;
                 foreach (var item in p.ParameterNames)
                 {
-                    if (computedProperties.Any(prop => prop.Name == item) )
-                    {
+                    if (computedProperties.Any(prop => prop.Name == item))
                         continue;
-                    }
-                    if (!includeKeyColumn && keyProperties.Any(prop => prop.Name == item) )
-                    {
+                    // When !includeKeyColumn, exclude both [Key] (identity) and [ExplicitKey] (explicit PK)
+                    // so that neither ends up in UPDATE SET — they are handled separately in upsert logic.
+                    if (!includeKeyColumn && keyProperties.Any(prop => prop.Name == item))
                         continue;
-                    }
+                    if (!includeKeyColumn && explicitKeyProperties.Any(prop => prop.Name == item))
+                        continue;
                     setNames.Add(item);
                 }
             }
@@ -230,13 +232,12 @@ namespace TownSuite.DapperExtras
                 foreach (var prop in props)
                 {
                     if (computedProperties.Any(p => p.Name == prop.Name))
-                    {
                         continue;
-                    }
-                    if (!includeKeyColumn && keyProperties.Any(p => p.Name == prop.Name) )
-                    {
+                    // When !includeKeyColumn, exclude both [Key] (identity) and [ExplicitKey] (explicit PK)
+                    if (!includeKeyColumn && keyProperties.Any(p => p.Name == prop.Name))
                         continue;
-                    }
+                    if (!includeKeyColumn && explicitKeyProperties.Any(p => p.Name == prop.Name))
+                        continue;
                     setNames.Add(prop.Name);
                 }
             }

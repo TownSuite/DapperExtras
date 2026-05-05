@@ -126,6 +126,20 @@ public class TownSuiteDapperExtensions_IntegrationTests
         var row2 = await connection.QueryFirstOrDefaultAsync<ExampleTable>("select * from ExampleTable where Id=@Id",
             new { Id = 3 });
         Assert.That(row2.Col1, Is.EqualTo("AsyncUpdated"));
+        
+        var updateItem3 = new ExampleTable3()
+        {
+            Id = 3,
+            Col1 = "AsyncUpdated",
+            Col2 = "AsyncUpdated2",
+            Col3 = new DateTime(2027, 7, 7)
+        };
+
+        var aff23 = await connection.UpSertAsync<ExampleTable3>(updateItem3, new { Id = updateItem.Id });
+        Assert.That(aff2, Is.GreaterThanOrEqualTo(0));
+        var row3 = await connection.QueryFirstOrDefaultAsync<ExampleTable>("select * from ExampleTable where Id=@Id",
+            new { Id = 3 });
+        Assert.That(row3.Col1, Is.EqualTo("AsyncUpdated"));
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
@@ -297,6 +311,15 @@ public class TownSuiteDapperExtensions_IntegrationTests
             (3, 'Value3', 'ValueC', '2024-03-01');";
             connection.Execute(insertDataSql);
 
+            var createTableSql3 = @"
+            CREATE TABLE ExampleTable3 (
+                Id INTEGER PRIMARY KEY,
+                Col1 TEXT,
+                Col2 TEXT,
+                Col3 TEXT
+            );";
+            connection.Execute(createTableSql3);
+            
             return connection;
         }
 
@@ -315,6 +338,7 @@ BEGIN
             );
 END";
             connection.Execute(createTableSql);
+            
             var insertDataSql = @"
             TRUNCATE TABLE ExampleTable;
             INSERT INTO ExampleTable (Id, Col1, Col2, Col3) VALUES
@@ -322,8 +346,23 @@ END";
             (2, 'Value2', 'ValueB', '2024-02-01'),
             (3, 'Value3', 'ValueC', '2024-03-01');";
             connection.Execute(insertDataSql);
+            
+            var createTable3Sql = @"
+IF OBJECT_ID(N'dbo.ExampleTable3', N'U') IS NULL
+BEGIN
+            CREATE TABLE ExampleTable3 (
+                Id INT IDENTITY(1,1) PRIMARY KEY,
+                Col1 NVARCHAR(100),
+                Col2 NVARCHAR(100),
+                Col3 DATETIME
+            );
+END";
+            connection.Execute(createTable3Sql);
+            
             return connection;
         }
+        
+        
 
         private static NpgsqlConnection CreatePostgreSqlDatabase()
         {
@@ -337,6 +376,7 @@ END";
                 Col3 TIMESTAMP
             );";
             connection.Execute(createTableSql);
+            
             var insertDataSql = @"
             TRUNCATE TABLE ExampleTable;
             INSERT INTO ExampleTable (Id, Col1, Col2, Col3) VALUES
@@ -344,6 +384,16 @@ END";
             (2, 'Value2', 'ValueB', '2024-02-01'),
             (3, 'Value3', 'ValueC', '2024-03-01');";
             connection.Execute(insertDataSql);
+            
+            var createTableSql3 = @"
+            CREATE TABLE IF NOT EXISTS ExampleTable3 (
+                Id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                Col1 VARCHAR(100),
+                Col2 VARCHAR(100),
+                Col3 TIMESTAMP
+            );";
+            connection.Execute(createTableSql3);
+            
             return connection;
         }
 

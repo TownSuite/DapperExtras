@@ -1,10 +1,12 @@
-namespace TownSuite.DapperExtras.Tests;
 using Dapper.Contrib.Extensions;
+
+namespace TownSuite.DapperExtras.Tests;
+
 
 [Dapper.Contrib.Extensions.Table("ExampleTable")]
 public class ExampleTable
 {
-    [Dapper.Contrib.Extensions.Key()]
+    [Dapper.Contrib.Extensions.ExplicitKey()]
     public long Id { get; set; }
 
     public string Col1 { get; set; }

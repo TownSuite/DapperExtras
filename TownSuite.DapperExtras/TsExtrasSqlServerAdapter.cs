@@ -104,7 +104,7 @@ namespace TownSuite.DapperExtras
         public override async Task<int> UpSertAsync<T>(IDbConnection connection, T setParam, object whereParam,
             IDbTransaction transaction = null, int? commandTimeout = null)
         {
-            var sql = UpSertSqlGeneration<T>(setParam, whereParam, "[", "]"); 
+            var sql = UpSertSqlGeneration<T>(setParam, whereParam, "[", "]");
             var param = TsExtrasCommonSqlGen.Merge(whereParam, setParam);
 
             return await connection.ExecuteAsync(sql.ToString(), param, transaction, commandTimeout: commandTimeout);
@@ -116,6 +116,14 @@ namespace TownSuite.DapperExtras
             var type = typeof(T);
             var setNames = new List<string>();
             var whereNames = new List<string>();
+            // [Key]         = identity/auto-increment: DB generates the value; never include in INSERT column list.
+            // [ExplicitKey] = value supplied by calling code: include in INSERT, but not in UPDATE SET.
+            var keyNames = new HashSet<string>(
+                type.GetProperties()
+                    .Where(p => p.GetCustomAttributes(true).Any(a => a.GetType().Name == "KeyAttribute"))
+                    .Select(p => p.Name),
+                StringComparer.OrdinalIgnoreCase);
+            // includeKeyColumn: false excludes both [Key] and [ExplicitKey] from the UPDATE SET columns.
             TsExtrasCommonSqlGen.ParameterNameList(setParam, setNames, includeKeyColumn: false);
             TsExtrasCommonSqlGen.ParameterNameList(whereParam, whereNames);
 
@@ -193,9 +201,18 @@ namespace TownSuite.DapperExtras
             var sbInsertValues = new StringBuilder();
             sbInsertValues.AppendLine(") VALUES (");
 
-            // Include key columns (from whereNames, using _1-suffixed params)
+            // Include key columns (from whereNames) in INSERT:
+            //   [Key]         → skip (identity — DB auto-generates the value)
+            //   [ExplicitKey] → include (caller supplies the value)
+            //   anything else → include
             foreach (var name in whereNames)
             {
+                if (keyNames.Contains(name))
+                {
+                    // Identity column — let SQL Server assign the value on insert.
+                    continue;
+                }
+
                 if (setComma3)
                 {
                     sql.Append(", ");
