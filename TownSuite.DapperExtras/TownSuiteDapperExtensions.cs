@@ -156,12 +156,19 @@ namespace TownSuite.DapperExtras
                     var dbParam = (IDbDataParameter)cmd.CreateParameter();
                     dbParam.ParameterName = $"@{prop.Name}";
 
-                    // invoke SetValue(handler) via reflection to let the handler set DbType/Value/etc.
+                    // invoke SetValue(handler) via reflection so the handler can convert the CLR value.
                     var setValueMethod = handlerObj.GetType()
                         .GetMethod("SetValue", BindingFlags.Public | BindingFlags.Instance);
                     if (setValueMethod != null)
                     {
-                        setValueMethod.Invoke(handlerObj, new object[] { dbParam, valueObj });
+                        // Use the handler to transform the CLR value, but only copy Value to avoid forcing provider DbType.
+                        var handlerParam = (IDbDataParameter)cmd.CreateParameter();
+                        setValueMethod.Invoke(handlerObj, new object[] { handlerParam, valueObj });
+                        dbParam.Value = handlerParam.Value;
+                        if (dbParam.Value == null)
+                        {
+                            dbParam.Value = DBNull.Value;
+                        }
                     }
                     else
                     {
@@ -173,7 +180,7 @@ namespace TownSuite.DapperExtras
                 // fallback if no handler instance available
                 var fallbackParam = cmd.CreateParameter();
                 fallbackParam.ParameterName = $"@{prop.Name}";
-                fallbackParam.Value = valueObj?.ToString();
+                fallbackParam.Value = valueObj ?? DBNull.Value;
                 return fallbackParam;
             }
 
@@ -184,7 +191,7 @@ namespace TownSuite.DapperExtras
             return parameter;
         }
 
-        public static Task<DataTable> QueryDtAsync(this IDbConnection connection, string sql, object param = null,
+        public static async Task<DataTable> QueryDtAsync(this IDbConnection connection, string sql, object param = null,
             IDbTransaction transaction = null, int? commandTimeout = null,
             CommandType commandType = CommandType.Text)
         {
@@ -209,7 +216,7 @@ namespace TownSuite.DapperExtras
                     }
                 }
 
-                return ExecuteCmdTableAsync(cmd);
+                return await ExecuteCmdTableAsync(cmd);
             }
         }
 
@@ -227,7 +234,6 @@ namespace TownSuite.DapperExtras
                 {
                     DataTable dt = new DataTable();
                     dt.Load(drSqlDataReader);
-                    drSqlDataReader.Close();
 
                     if (origSate == ConnectionState.Closed)
                     {
@@ -253,7 +259,6 @@ namespace TownSuite.DapperExtras
             using (var drSqlDataReader = cmd.ExecuteReader())
             {
                 dt.Load(drSqlDataReader);
-                drSqlDataReader.Close();
             }
 
             if (origSate == ConnectionState.Closed)

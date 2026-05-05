@@ -11,26 +11,22 @@ namespace TownSuite.DapperExtras.Tests;
 
 public class TownSuiteDapperExtensions_IntegrationTests
 {
-    [SetUp]
-    public async Task Setup()
+    [OneTimeSetUp]
+    public async Task OneTimeSetup()
     {
-#if ENABLE_TESTCONTAINERS
         await DatabaseTestCases.InitializeAsync();
-#endif
     }
 
-    [TearDown]
-    public async Task TearDown()
+    [OneTimeTearDown]
+    public async Task OneTimeTearDown()
     {
-#if ENABLE_TESTCONTAINERS
         await DatabaseTestCases.DisposeAsync();
-#endif
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
-    public async Task GetWhereAsync_ReturnsMatchingRow_Test(IDbConnection connection)
+    public async Task GetWhereAsync_ReturnsMatchingRow_Test(Func<IDbConnection> connectionFactory)
     {
-        //await using var connection = CreateSqliteDatabase();
+        using var connection = connectionFactory();
         var results = await connection.GetWhereAsync<ExampleTable>(new { Id = 1 });
         Assert.That(results.Count(), Is.EqualTo(1));
         var first = results.First();
@@ -38,16 +34,18 @@ public class TownSuiteDapperExtensions_IntegrationTests
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
-    public void DeleteWhere_RemovesRow_Sync_Test(IDbConnection connection)
+    public void DeleteWhere_RemovesRow_Sync_Test(Func<IDbConnection> connectionFactory)
     {
+        using var connection = connectionFactory();
         connection.DeleteWhere<ExampleTable>(new { Id = 1 });
         var remaining = connection.Query<ExampleTable>("select * from ExampleTable where Id=@Id", new { Id = 1 });
         Assert.That(remaining.Count(), Is.EqualTo(0));
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
-    public async Task DeleteWhereAsync_RemovesRow_Async_Test(IDbConnection connection)
+    public async Task DeleteWhereAsync_RemovesRow_Async_Test(Func<IDbConnection> connectionFactory)
     {
+        using var connection = connectionFactory();
         await connection.DeleteWhereAsync<ExampleTable>(new { Id = 2 });
         var remaining =
             await connection.QueryAsync<ExampleTable>("select * from ExampleTable where Id=@Id", new { Id = 2 });
@@ -55,8 +53,9 @@ public class TownSuiteDapperExtensions_IntegrationTests
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
-    public void UpSert_InsertsWhenMissing_Sync_Test(IDbConnection connection)
+    public void UpSert_InsertsWhenMissing_Sync_Test(Func<IDbConnection> connectionFactory)
     {
+        using var connection = connectionFactory();
         var newItem = new ExampleTable()
         {
             Id = 4,
@@ -75,8 +74,9 @@ public class TownSuiteDapperExtensions_IntegrationTests
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
-    public void UpSert_UpdatesWhenPresent_Sync_Test(IDbConnection connection)
+    public void UpSert_UpdatesWhenPresent_Sync_Test(Func<IDbConnection> connectionFactory)
     {
+        using var connection = connectionFactory();
         var updated = new ExampleTable()
         {
             Id = 1,
@@ -95,8 +95,9 @@ public class TownSuiteDapperExtensions_IntegrationTests
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
-    public async Task UpSertAsync_InsertsAndUpdates_Async_Test(IDbConnection connection)
+    public async Task UpSertAsync_InsertsAndUpdates_Async_Test(Func<IDbConnection> connectionFactory)
     {
+        using var connection = connectionFactory();
         var insertItem = new ExampleTable()
         {
             Id = 5,
@@ -128,8 +129,9 @@ public class TownSuiteDapperExtensions_IntegrationTests
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
-    public void TsInsert_InsertsRow_ReturnsAffectedRows_Sync_Test(IDbConnection connection)
+    public void TsInsert_InsertsRow_ReturnsAffectedRows_Sync_Test(Func<IDbConnection> connectionFactory)
     {
+        using var connection = connectionFactory();
         var item = new { Id = 6, Col1 = "I1", Col2 = "I2", Col3 = new DateTime(2028, 8, 8) };
         var affected = connection.TsInsert<ExampleTable>(item);
         Assert.That(affected, Is.EqualTo(1));
@@ -139,8 +141,9 @@ public class TownSuiteDapperExtensions_IntegrationTests
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
-    public async Task TsInsertAsync_InsertsRow_ReturnsAffectedRows_Async_Test(IDbConnection connection)
+    public async Task TsInsertAsync_InsertsRow_ReturnsAffectedRows_Async_Test(Func<IDbConnection> connectionFactory)
     {
+        using var connection = connectionFactory();
         var item = new { Id = 7, Col1 = "AI1", Col2 = "AI2", Col3 = new DateTime(2029, 9, 9) };
         var affected = await connection.TsInsertAsync<ExampleTable>(item);
         Assert.That(affected, Is.EqualTo(1));
@@ -150,8 +153,9 @@ public class TownSuiteDapperExtensions_IntegrationTests
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
-    public void GetWhere_Test(IDbConnection connection)
+    public void GetWhere_Test(Func<IDbConnection> connectionFactory)
     {
+        using var connection = connectionFactory();
         var results = connection.GetWhere<ExampleTable>(new { Id = 1 });
         Assert.That(results.Count(), Is.EqualTo(1));
         var first = results.First();
@@ -161,8 +165,9 @@ public class TownSuiteDapperExtensions_IntegrationTests
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
-    public void UpdateWhere_and_GetWhereFirstOrDefault_Test(IDbConnection connection)
+    public void UpdateWhere_and_GetWhereFirstOrDefault_Test(Func<IDbConnection> connectionFactory)
     {
+        using var connection = connectionFactory();
         connection.UpdateWhere<ExampleTable>(new ExampleTable()
         {
             Id = 1,
@@ -174,12 +179,13 @@ public class TownSuiteDapperExtensions_IntegrationTests
         var result = connection.GetWhereFirstOrDefault<ExampleTable>(new { Id = 1 });
         Assert.That(result.Col1, Is.EqualTo("test1"));
         Assert.That(result.Col2, Is.EqualTo("test2"));
-        Assert.That(result.Col3, Is.EqualTo(new DateTime(2025, 12, 12)));
+        Assert.That(result.Col3.Date, Is.EqualTo(new DateTime(2025, 12, 12)));
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
-    public async Task UpdateWhere_and_GetWhereFirstOrDefault_Async_Test(IDbConnection connection)
+    public async Task UpdateWhere_and_GetWhereFirstOrDefault_Async_Test(Func<IDbConnection> connectionFactory)
     {
+        using var connection = connectionFactory();
         await connection.UpdateWhereAsync<ExampleTable>(new ExampleTable()
         {
             Id = 1,
@@ -191,24 +197,26 @@ public class TownSuiteDapperExtensions_IntegrationTests
         var result = await connection.GetWhereFirstOrDefaultAsync<ExampleTable>(new { Id = 1 });
         Assert.That(result.Col1, Is.EqualTo("test1"));
         Assert.That(result.Col2, Is.EqualTo("test2"));
-        Assert.That(result.Col3, Is.EqualTo(new DateTime(2025, 12, 12)));
+        Assert.That(result.Col3.Date, Is.EqualTo(new DateTime(2025, 12, 12)));
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
-    public async Task QueryDt_Test(IDbConnection connection)
+    public async Task QueryDt_Test(Func<IDbConnection> connectionFactory)
     {
+        using var connection = connectionFactory();
         DataTable dt = connection.QueryDt("select * from exampletable where id=@Id", new { Id = 1 });
 
         Assert.That(dt.Rows.Count, Is.EqualTo(1));
         DataRow row = dt.Rows[0];
         Assert.That(row["Col1"], Is.EqualTo("Value1"));
         Assert.That(row["Col2"], Is.EqualTo("ValueA"));
-        Assert.That(row["Col3"], Is.EqualTo("2024-01-01"));
+        Assert.That(row["Col3"].ToString().StartsWith("2024-01-01"));
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
-    public async Task QueryDt_WithSqlMapper_Test(IDbConnection connection)
+    public async Task QueryDt_WithSqlMapper_Test(Func<IDbConnection> connectionFactory)
     {
+        using var connection = connectionFactory();
         SqlMapper.AddTypeHandler(typeof(CustomId), new CustomIdDapperTypeHandler());
 
         var id = new CustomId { Id = 1 };
@@ -217,26 +225,30 @@ public class TownSuiteDapperExtensions_IntegrationTests
         DataRow row = dt.Rows[0];
         Assert.That(row["Col1"], Is.EqualTo("Value1"));
         Assert.That(row["Col2"], Is.EqualTo("ValueA"));
-        Assert.That(row["Col3"], Is.EqualTo("2024-01-01"));
+        
+        // sqlite returrns exactly what was set, postgresql and sql server are using a datetime column type and returns
+        // extra info
+        Assert.That(row["Col3"].ToString().StartsWith("2024-01-01"));
         
         DataTable dt2 = await connection.QueryDtAsync("select * from exampletable where id=@Id", new { Id = id });
         Assert.That(dt2.Rows.Count, Is.EqualTo(1));
         DataRow row2 = dt2.Rows[0];
         Assert.That(row2["Col1"], Is.EqualTo("Value1"));
         Assert.That(row2["Col2"], Is.EqualTo("ValueA"));
-        Assert.That(row2["Col3"], Is.EqualTo("2024-01-01"));
+        Assert.That(row2["Col3"].ToString().StartsWith("2024-01-01"));
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
-    public async Task QueryDtAsync_Test(IDbConnection connection)
+    public async Task QueryDtAsync_Test(Func<IDbConnection> connectionFactory)
     {
+        using var connection = connectionFactory();
         DataTable dt = await connection.QueryDtAsync("select * from exampletable where id=@Id", new { Id = 1 });
 
         Assert.That(dt.Rows.Count, Is.EqualTo(1));
         DataRow row = dt.Rows[0];
         Assert.That(row["Col1"], Is.EqualTo("Value1"));
         Assert.That(row["Col2"], Is.EqualTo("ValueA"));
-        Assert.That(row["Col3"], Is.EqualTo("2024-01-01"));
+        Assert.That(row["Col3"].ToString().StartsWith("2024-01-01"));
     }
 
     public static class DatabaseTestCases
@@ -293,7 +305,7 @@ public class TownSuiteDapperExtensions_IntegrationTests
             var connection = new SqlConnection(_msSqlContainer.GetConnectionString());
             connection.Open();
             var createTableSql = @"
-IF OBJECT_ID(N'dbo.YourTableName', N'U') IS NULL
+IF OBJECT_ID(N'dbo.ExampleTable', N'U') IS NULL
 BEGIN
             CREATE TABLE ExampleTable (
                 Id INT PRIMARY KEY,
@@ -335,36 +347,27 @@ END";
             return connection;
         }
 
-        public static IEnumerable<IDbConnection> TestCases
+        public static IDbConnection CreateDatabase(string provider)
+        {
+            return provider switch
+            {
+                "sqlite" => CreateSqliteDatabase(),
+                "sqlserver" => CreateSqlServerDatabase(),
+                "postgres" => CreatePostgreSqlDatabase(),
+                _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, "Unsupported provider")
+            };
+        }
+
+        public static IEnumerable TestCases
         {
             get
             {
-                var testCases = new List<IDbConnection>
+                var testCases = new List<TestCaseData>
                 {
-                    CreateSqliteDatabase()
+                    new TestCaseData(new Func<IDbConnection>(() => CreateDatabase("sqlite"))).SetName("{m}(sqlite)"),
+                    new TestCaseData(new Func<IDbConnection>(() => CreateDatabase("sqlserver"))).SetName("{m}(sqlserver)"),
+                    new TestCaseData(new Func<IDbConnection>(() => CreateDatabase("postgres"))).SetName("{m}(postgres)")
                 };
-
-#if ENABLE_TESTCONTAINERS
-                try
-                {
-                    testCases.Add(CreateSqlServerDatabase());
-                }
-                catch (InvalidOperationException)
-                {
-                    // Containers not started yet - this is expected during test case enumeration
-                    // before Setup() is called
-                }
-
-                try
-                {
-                    testCases.Add(CreatePostgreSqlDatabase());
-                }
-                catch (InvalidOperationException)
-                {
-                    // Containers not started yet - this is expected during test case enumeration
-                    // before Setup() is called
-                }
-#endif
 
                 return testCases;
             }

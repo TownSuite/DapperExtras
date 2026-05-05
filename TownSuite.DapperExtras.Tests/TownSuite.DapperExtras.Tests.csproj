@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <DefineConstants>$(DefineConstants);ENABLE_TESTCONTAINERS_no</DefineConstants>
+        <DefineConstants>$(DefineConstants);ENABLE_TESTCONTAINERS</DefineConstants>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
