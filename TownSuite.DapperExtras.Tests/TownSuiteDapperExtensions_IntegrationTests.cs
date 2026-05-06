@@ -224,7 +224,8 @@ public class TownSuiteDapperExtensions_IntegrationTests
         DataRow row = dt.Rows[0];
         Assert.That(row["Col1"], Is.EqualTo("Value1"));
         Assert.That(row["Col2"], Is.EqualTo("ValueA"));
-        Assert.That(row["Col3"].ToString().StartsWith("2024-01-01"), row["Col3"].ToString());
+        DateTime parsedCol3 = DateParse(row);
+        Assert.That(parsedCol3.Date, Is.EqualTo(new DateTime(2024, 1, 1)), row["Col3"].ToString());
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
@@ -240,16 +241,32 @@ public class TownSuiteDapperExtensions_IntegrationTests
         Assert.That(row["Col1"], Is.EqualTo("Value1"));
         Assert.That(row["Col2"], Is.EqualTo("ValueA"));
         
-        // sqlite returrns exactly what was set, postgresql and sql server are using a datetime column type and returns
-        // extra info
-        Assert.That(row["Col3"].ToString().StartsWith("2024-01-01"), row["Col3"].ToString());
+        DateTime parsedCol3 = DateParse(row);
+        Assert.That(parsedCol3.Date, Is.EqualTo(new DateTime(2024, 1, 1)), row["Col3"].ToString());
         
         DataTable dt2 = await connection.QueryDtAsync("select * from exampletable where id=@Id", new { Id = id });
         Assert.That(dt2.Rows.Count, Is.EqualTo(1));
         DataRow row2 = dt2.Rows[0];
         Assert.That(row2["Col1"], Is.EqualTo("Value1"));
         Assert.That(row2["Col2"], Is.EqualTo("ValueA"));
-        Assert.That(row2["Col3"].ToString().StartsWith("2024-01-01"), row2["Col3"].ToString());
+        DateTime parsedCol32 = DateParse(row2);
+        Assert.That(parsedCol32.Date, Is.EqualTo(new DateTime(2024, 1, 1)), row2["Col3"].ToString());
+    }
+
+    private static DateTime DateParse(DataRow row)
+    {   // sqlite returns exactly what was set, postgresql and sql server are using a datetime column type and returns
+        // extra info
+        DateTime parsedCol3;
+        if (row["Col3"].GetType() == typeof(DateTime))
+        {
+            parsedCol3 = row.Field<DateTime>("Col3");
+        }
+        else
+        {
+            parsedCol3 = DateTime.Parse(row["Col3"].ToString()!);
+        }
+
+        return parsedCol3;
     }
 
     [TestCaseSource(typeof(DatabaseTestCases), nameof(DatabaseTestCases.TestCases))]
@@ -262,7 +279,8 @@ public class TownSuiteDapperExtensions_IntegrationTests
         DataRow row = dt.Rows[0];
         Assert.That(row["Col1"], Is.EqualTo("Value1"));
         Assert.That(row["Col2"], Is.EqualTo("ValueA"));
-        Assert.That(row["Col3"].ToString().StartsWith("2024-01-01"), row["Col3"].ToString());
+        DateTime parsedCol3 = DateParse(row);
+        Assert.That(parsedCol3.Date, Is.EqualTo(new DateTime(2024, 1, 1)), row["Col3"].ToString());
     }
 
     public static class DatabaseTestCases
