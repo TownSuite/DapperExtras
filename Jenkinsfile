@@ -34,9 +34,6 @@ pipeline {
                 }
                 stage('Build') {
                     steps {
-                        script {
-                            townsuite.common_environment_configuration()
-                        }
                         sh '''
                         dotnet build "TownSuite.Dapper.Extras.sln" -p:Platform="Any CPU" -p:Configuration="Release" -p:GeneratePackageOnBuild=false
                         '''
@@ -44,12 +41,14 @@ pipeline {
                 }
                 stage('Test') {
                     steps {
-                        script {
-                            townsuite.common_environment_configuration()
-                        }
                         sh '''
                         dotnet test "TownSuite.Dapper.Extras.sln" -c "Release" -p:DefineConstants="ENABLE_TESTCONTAINERS" --logger:"nunit"
                         '''
+                    }
+                    post {
+                        always {
+                            nunit testResultsPattern: '**/TestResults/*.xml'
+                        }
                     }
                 }
                 stage('Code Sign') {
