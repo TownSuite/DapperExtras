@@ -36,6 +36,12 @@ pipeline {
                     steps {
                         sh '''
                         dotnet build "TownSuite.Dapper.Extras.sln" -p:Platform="Any CPU" -p:Configuration="Release" -p:GeneratePackageOnBuild=false
+
+                        VERSION=`cat Directory.Build.props | grep "<Version>"  | sed 's/[^0-9.]*//g'`
+                        mkdir -p build
+                        echo "VERSION=$VERSION" > build/parameterproperties.txt
+                        echo "GITHASH=$(git rev-parse --short HEAD)" >> build/parameterproperties.txt
+                        echo "GITHASH_FULL=$(git rev-parse HEAD)" >> build/parameterproperties.txt
                         '''
                     }
                 }
@@ -77,7 +83,7 @@ pipeline {
                     steps {
                         echo 'archiving artifacts'
                         script{
-                            townsuite.archiveWithRetryAndLock('build/*.nupkg', 3)
+                            townsuite.archiveWithRetryAndLock('build/*.nupkg,build/parameterproperties.txt', 3)
                         }
                     }
                 }
