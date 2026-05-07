@@ -377,15 +377,33 @@ namespace TownSuite.DapperExtras
                     name = name.Substring(1);
             }
 
-            string schema = null;
-            string table = null;
             if (name.Contains('.'))
             {
                 var parts = name.Split(new[] { '.' }, 2);
-                return (parts[0], parts[1]);
+                return (StripIdentifierQuotes(parts[0]), StripIdentifierQuotes(parts[1]));
             }
 
-            return ("", name);
+            return ("", StripIdentifierQuotes(name));
+        }
+
+        /// <summary>
+        /// Strips SQL Server-style bracket quoting ([name]) and double-quote quoting ("name")
+        /// from an identifier so the raw name can be safely re-quoted by each adapter.
+        /// </summary>
+        private static string StripIdentifierQuotes(string identifier)
+        {
+            if (string.IsNullOrEmpty(identifier))
+                return identifier;
+
+            identifier = identifier.Trim();
+
+            if (identifier.StartsWith("[") && identifier.EndsWith("]"))
+                return identifier.Substring(1, identifier.Length - 2);
+
+            if (identifier.StartsWith("\"") && identifier.EndsWith("\""))
+                return identifier.Substring(1, identifier.Length - 2);
+
+            return identifier;
         }
         
         internal virtual string InsertGeneration<T>(object setParam,
