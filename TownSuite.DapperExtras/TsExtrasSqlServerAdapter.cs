@@ -229,8 +229,13 @@ namespace TownSuite.DapperExtras
             }
 
             // Include non-key columns (from setNames, using _2-suffixed params)
+            // Skip any column already emitted via whereNames to avoid duplicate column names in INSERT.
+            var whereNamesSet = new HashSet<string>(whereNames, StringComparer.OrdinalIgnoreCase);
             foreach (var name in setNames)
             {
+                if (whereNamesSet.Contains(name))
+                    continue;
+
                 if (setComma3)
                 {
                     sql.Append(", ");

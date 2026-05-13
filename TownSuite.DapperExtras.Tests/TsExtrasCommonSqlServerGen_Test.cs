@@ -109,6 +109,45 @@ INSERT (
 );"));
     }
 
+    /// <summary>
+    /// Regression test for the bug where composite-non-key WHERE columns (e.g. Metric + ServerMac)
+    /// appeared in both the whereNames and setNames lists, causing each column to be emitted twice
+    /// in the MERGE INSERT column list:
+    ///   INSERT ([Metric], [ServerMac], [ServerMac], [Metric], ...) -- BROKEN (before fix)
+    ///   INSERT ([Metric], [ServerMac], [Count], [TimeCreated])     -- CORRECT (after fix)
+    /// </summary>
+    [Test]
+    public void SqlServer_Upsert_CompositeNonKeyWhereColumns_NoDuplicateInsertColumns_Test()
+    {
+        var genSql = new TsExtrasSqlServerAdapter();
+        string sql =
+            genSql.UpSertSqlGeneration<MetricsTable>(
+                new MetricsTable
+                {
+                    Metric = "cpu_usage",
+                    ServerMac = "AA:BB:CC:DD:EE:FF",
+                    Count = 42,
+                    TimeCreated = DateTime.MinValue
+                },
+                new { Metric = "cpu_usage", ServerMac = "AA:BB:CC:DD:EE:FF" },
+                startQoute: "[", endQoute: "]");
+
+        // INSERT column list must not contain [Metric] or [ServerMac] twice
+        Assert.That(sql, Is.EqualTo(@"MERGE INTO 
+[Dashboard].[metrics]
+AS tgt 
+USING
+(SELECT @Metric_1 [Metric], @ServerMac_1 [ServerMac]) AS src 
+ON tgt.[Metric]=src.[Metric] AND tgt.[ServerMac]=src.[ServerMac]
+WHEN MATCHED THEN
+UPDATE SET [Metric]=@Metric_2, [ServerMac]=@ServerMac_2, [Count]=@Count_2, [TimeCreated]=@TimeCreated_2
+WHEN NOT MATCHED THEN 
+INSERT (
+[Metric], [ServerMac], [Count], [TimeCreated]) VALUES (
+@Metric_1, @ServerMac_1, @Count_2, @TimeCreated_2
+);"));
+    }
+
     [Test]
     public void SqlServer_Insert_Test()
     {
